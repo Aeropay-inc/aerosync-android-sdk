@@ -3,6 +3,14 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+ext {
+    PUBLISH_GROUP_ID = 'com.aerosync'
+    PUBLISH_VERSION = '1.0.1'
+    PUBLISH_ARTIFACT_ID = 'bank-link-sdk'
+}
+
+apply from: "${rootProject.projectDir}/scripts/publish-module.gradle"
+
 android {
     namespace 'com.aerosync.bank_link_sdk'
     compileSdk 33
@@ -39,4 +47,5 @@ dependencies {
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+    implementation 'com.google.code.gson:gson:2.10.1'
 }

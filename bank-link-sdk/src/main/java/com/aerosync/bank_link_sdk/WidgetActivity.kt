@@ -3,14 +3,12 @@ package com.aerosync.bank_link_sdk
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
 
-
-class WidgetActivity : AppCompatActivity() {
+class WidgetActivity: AppCompatActivity() {
 
     protected var url: String? = null;
 
@@ -23,12 +21,12 @@ class WidgetActivity : AppCompatActivity() {
     protected fun initializeWebView() {
         val intent = intent ?: return
         @Suppress("DEPRECATION")
-        val widget: Widget = intent.getSerializableExtra("widget") as Widget
+        val widget: Widget = intent.getSerializableExtra("widget") as Widget;
         url = widget.url;
         val webView = findViewById<WebView>(R.id.webView);
         @SuppressLint("SetJavaScriptEnabled")
         webView.settings.javaScriptEnabled = true;
-        webView.addJavascriptInterface(WebAppInterface(this), "Android");
+        webView.addJavascriptInterface(WebAppInterface(this, widget.eventListener), "BankLinkSDKAndroid");
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(
                 view: WebView,
