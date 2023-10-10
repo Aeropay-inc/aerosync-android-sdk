@@ -27,7 +27,7 @@ data class Widget(
            deeplink != null &&
            token !==null) {
             url = constructUrl();
-            val intent = Intent(context, WidgetActivity()::class.java);
+            val intent = Intent(context, WidgetActivity::class.java);
             intent.putExtra("widget", this)
             context.startActivity(intent);
         }

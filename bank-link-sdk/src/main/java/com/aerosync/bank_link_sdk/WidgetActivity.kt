@@ -7,10 +7,8 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
-import java.io.Serializable
 
-
-class WidgetActivity() : AppCompatActivity() {
+class WidgetActivity: AppCompatActivity() {
 
     protected var url: String? = null;
 
