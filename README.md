@@ -97,7 +97,6 @@ class Homepage : AppCompatActivity(), EventListener {
 # 4. Bank Link SDK configuration and Aerosync-UI Response:
 
 https://api-aeropay.readme.io/docs/android-sdk#4-bank-link-sdk-configuration
-https://api-aeropay.readme.io/docs/android-sdk#5-aerosync-ui-response
 
 
 
