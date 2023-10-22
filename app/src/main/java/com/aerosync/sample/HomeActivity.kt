@@ -1,5 +1,6 @@
 package com.aerosync.sample
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -54,5 +55,6 @@ class HomeActivity : AppCompatActivity(), EventListener {
         Toast.makeText(context,"widget closed", Toast.LENGTH_SHORT).show()
         val intent = Intent(context, HomeActivity::class.java)
         context.startActivity(intent);
+        (context as Activity).finish()
     }
 }
