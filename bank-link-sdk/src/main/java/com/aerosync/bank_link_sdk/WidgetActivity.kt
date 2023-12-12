@@ -21,12 +21,11 @@ class WidgetActivity: AppCompatActivity() {
     protected fun initializeWebView() {
         val intent = intent ?: return
         @Suppress("DEPRECATION")
-        val widget: Widget = intent.getSerializableExtra("widget") as Widget;
-        url = widget.url;
+        val url: String = intent.getSerializableExtra("url") as String;
         val webView = findViewById<WebView>(R.id.webView);
         @SuppressLint("SetJavaScriptEnabled")
         webView.settings.javaScriptEnabled = true;
-        webView.addJavascriptInterface(WebAppInterface(this, widget.eventListener), "BankLinkSDKAndroid");
+        webView.addJavascriptInterface(WebAppInterface(this, Widget.eventObj), "BankLinkSDKAndroid");
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(
                 view: WebView,

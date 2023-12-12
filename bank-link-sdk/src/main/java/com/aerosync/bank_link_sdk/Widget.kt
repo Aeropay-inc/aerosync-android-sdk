@@ -3,23 +3,26 @@ package com.aerosync.bank_link_sdk
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import java.io.Serializable
 
 data class Widget(
-    @Transient var context: Context,
+    var context: Context,
     var environment: String? = null,
     var deeplink: String? = null,
     var consumerId: String? = null,
     var token: String? = null,
     var url: String? = null,
     var eventListener: EventListener
+) {
 
-): Serializable {
+    companion object {
+        lateinit var eventObj: EventListener
+    }
 
     constructor(activity: Activity, eventListener: EventListener) : this(context = activity, eventListener = eventListener) {
         // Aerosync pre-defined deeplink
         // no need to change this value
-        this.deeplink = "aerosync://bank-link"
+        this.deeplink = "aerosync://bank-link";
+        eventObj = eventListener;
     }
 
     fun open() {
@@ -28,7 +31,7 @@ data class Widget(
            token !==null) {
             url = constructUrl();
             val intent = Intent(context, WidgetActivity::class.java);
-            intent.putExtra("widget", this)
+            intent.putExtra("url", this.url)
             context.startActivity(intent);
         }
     }
