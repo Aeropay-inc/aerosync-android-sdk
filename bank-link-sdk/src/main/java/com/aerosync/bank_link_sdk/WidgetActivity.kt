@@ -31,7 +31,8 @@ class WidgetActivity: AppCompatActivity() {
                 view: WebView,
                 request: WebResourceRequest
             ): Boolean {
-                if (request.url.toString().contains("aerosync.com")) {
+                if ((request.url.toString().contains("aerosync.com")) &&
+                    (!request.url.toString().contains("aerosync.com/bank/oauth-pages"))) {
                     view.loadUrl(request.url.toString())
                 } else {
                     val intent = Intent(Intent.ACTION_VIEW, request.url)
