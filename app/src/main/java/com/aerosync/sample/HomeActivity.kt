@@ -22,7 +22,7 @@ class HomeActivity : AppCompatActivity(), EventListener {
         when (v?.id) {
             R.id.button -> {
                 // open Aerosync widget
-                config.environment = "DEV"; //DEV, STAGE, PROD
+                config.environment = "PROD"; // STAGE, PROD
                 config.token = ""; // Add Aerosync token
                 config.open();
             }
