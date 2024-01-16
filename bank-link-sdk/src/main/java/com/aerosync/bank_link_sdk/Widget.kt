@@ -11,6 +11,9 @@ data class Widget(
     var consumerId: String? = null,
     var token: String? = null,
     var url: String? = null,
+    var handleMFA: Boolean? = false,
+    var jobId: String? = null,
+    var userId: String? = null,
     var eventListener: EventListener
 ) {
 
@@ -38,13 +41,24 @@ data class Widget(
 
     protected fun constructUrl(): String {
         val checkEnv = EnvironmentType.values().any { it.name == environment }
-        return if (!consumerId.isNullOrEmpty() && checkEnv) {
-            "${EnvironmentType.valueOf(environment!!).value}/?token=${token}" +
-                    "&deeplink=${deeplink}&consumerId=${consumerId}";
-        } else if (checkEnv) {
-            "${EnvironmentType.valueOf(environment!!).value}/?token=${token}&deeplink=${deeplink}";
-        } else {
-            "${EnvironmentType.valueOf("PROD").value}/?token=${token}&deeplink=${deeplink}"
+        var baseUrl = "${EnvironmentType.valueOf("PROD").value}/?token=${token!!}"
+
+        if(checkEnv) {
+            baseUrl = "${EnvironmentType.valueOf(environment!!).value}/?token=${token!!}";
         }
+
+        if(checkEnv && !consumerId.isNullOrEmpty()) {
+            baseUrl = "${baseUrl}&consumerId=${consumerId}";
+        }
+
+        if(checkEnv && !deeplink.isNullOrEmpty()) {
+            baseUrl = "${baseUrl}&deeplink=${deeplink}";
+        }
+        
+        if(checkEnv && handleMFA == true) {
+            baseUrl = "${baseUrl}&handleMFA=${handleMFA}&jobId=${jobId}&userId=${userId}";
+        }
+
+        return baseUrl;
     }
 }

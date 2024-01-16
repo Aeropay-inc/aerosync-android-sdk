@@ -24,6 +24,9 @@ class HomeActivity : AppCompatActivity(), EventListener {
                 // open Aerosync widget
                 config.environment = "PROD"; // STAGE, PROD
                 config.token = ""; // Add Aerosync token
+                config.handleMFA = false;
+                config.userId = "";
+                config.jobId = "";
                 config.open();
             }
         }
