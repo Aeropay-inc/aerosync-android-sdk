@@ -6,12 +6,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentActivity
 import com.aerosync.bank_link_sdk.EventListener
 import com.aerosync.bank_link_sdk.Widget
 
 
-class HomeActivity : AppCompatActivity(), EventListener {
+class HomeActivity : FragmentActivity(), EventListener {
 
     private val config = Widget(this, this);
     override fun onCreate(savedInstanceState: Bundle?) {
