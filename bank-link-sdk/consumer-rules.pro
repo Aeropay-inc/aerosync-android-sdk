@@ -1,0 +1,1 @@
+-keep class com.aerosync.bank_link_sdk.** { *; }

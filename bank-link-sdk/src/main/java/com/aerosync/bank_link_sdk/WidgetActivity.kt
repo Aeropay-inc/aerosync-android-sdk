@@ -7,14 +7,14 @@ import android.view.KeyEvent
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.FragmentActivity
 import org.json.JSONObject
 
 
 
 
 
-class WidgetActivity: AppCompatActivity() {
+class WidgetActivity: FragmentActivity() {
 
     private lateinit var webView: WebView
     private lateinit var webAppInterface: WebAppInterface
@@ -55,7 +55,8 @@ class WidgetActivity: AppCompatActivity() {
                 request: WebResourceRequest
             ): Boolean {
                 if ((request.url.toString().contains("aerosync.com")) &&
-                    (!request.url.toString().contains("aerosync.com/bank/oauth-pages"))) {
+                    (!request.url.toString().contains("aerosync.com/bank/oauth-pages")) &&
+                    (!request.url.toString().contains("aerosync.com/adc-redirect"))) {
                     view.loadUrl(request.url.toString())
                 } else {
                     val intent = Intent(Intent.ACTION_VIEW, request.url)
