@@ -1,3 +1,8 @@
 <resources>
-    <string name="home_button_name">open Aerosync widget</string>
+    <string name="app_name">test-client-android</string>
+    <string name="launch_aerosync">Launch Aerosync</string>
+    <string name="aerosync_android_sdk">Aerosync Android SDK</string>
+    <string name="enter_token">Enter Token</string>
+    <string name="enter_configuration_id">Enter Consumer ID</string>
+    <string name="enter_aeropass_id">Enter Aeropass ID</string>
 </resources>
