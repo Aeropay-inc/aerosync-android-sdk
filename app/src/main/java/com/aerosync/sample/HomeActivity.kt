@@ -24,7 +24,7 @@ class HomeActivity : FragmentActivity(), EventListener {
         setContentView(R.layout.activity_home)
         val dropdown = findViewById<Spinner>(R.id.spinner)
         //create a list of items for the spinner.
-        val items = arrayOf("DEV", "STAGE", "PROD")
+        val items = arrayOf("DEV", "STAGE", "SANDBOX", "PROD")
         val adapter: Any? = ArrayAdapter<Any?>(this, android.R.layout.simple_spinner_dropdown_item, items)
         dropdown.adapter = adapter as SpinnerAdapter?
     }
