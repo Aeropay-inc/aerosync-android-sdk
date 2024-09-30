@@ -8,12 +8,13 @@ data class Widget(
     var context: Context,
     var environment: String? = null,
     var deeplink: String? = null,
-    var consumerId: String? = null,
+    var configurationId: String? = null,
     var token: String? = null,
     var url: String? = null,
     var handleMFA: Boolean? = false,
     var jobId: String? = null,
     var userId: String? = null,
+    var aeroPassUserUuid: String? = null,
     var eventListener: EventListener
 ) {
 
@@ -47,8 +48,12 @@ data class Widget(
             baseUrl = "${EnvironmentType.valueOf(environment!!).value}/?token=${token!!}";
         }
 
-        if(checkEnv && !consumerId.isNullOrEmpty()) {
-            baseUrl = "${baseUrl}&consumerId=${consumerId}";
+        if(checkEnv && !configurationId.isNullOrEmpty()) {
+            baseUrl = "${baseUrl}&consumerId=${configurationId}";
+        }
+
+        if(checkEnv && !aeroPassUserUuid.isNullOrEmpty()) {
+            baseUrl = "${baseUrl}&aeroPassUserUuid=${aeroPassUserUuid}";
         }
 
         if(checkEnv && !deeplink.isNullOrEmpty()) {

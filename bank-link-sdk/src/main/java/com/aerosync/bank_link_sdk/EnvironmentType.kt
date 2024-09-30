@@ -1,7 +1,8 @@
 package com.aerosync.bank_link_sdk
 
 enum class EnvironmentType(val value: String) {
-    DEV("https://dev.aerosync.com"),
-    STAGE("https://staging.aerosync.com"),
-    PROD("https://www.aerosync.com")
+    DEV("https://qa-sync.aero.inc"),
+    STAGE("https://staging-sync.aero.inc"),
+    SANDBOX("https://sandbox.aerosync.com"),
+    PROD("https://sync.aero.inc")
 }
