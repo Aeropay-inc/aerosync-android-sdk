@@ -4,8 +4,8 @@ import android.content.Context;
 
 
 public interface EventListener {
-    void onSuccess(String response, Context context);
-    void onEvent(String type, String payload, Context context);
+    void onSuccess(PayloadSuccessType event, Context context);
+    void onEvent(PayloadEventType event, Context context);
     void onError(String error, Context context);
     void onClose(Context context);
 }
