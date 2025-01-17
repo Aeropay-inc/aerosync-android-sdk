@@ -54,14 +54,8 @@ class WidgetActivity: FragmentActivity() {
                 view: WebView,
                 request: WebResourceRequest
             ): Boolean {
-                if ((request.url.toString().contains("aerosync.com")) &&
-                    (!request.url.toString().contains("aerosync.com/bank/oauth-pages")) &&
-                    (!request.url.toString().contains("aerosync.com/adc-redirect"))) {
-                    view.loadUrl(request.url.toString())
-                } else {
-                    val intent = Intent(Intent.ACTION_VIEW, request.url)
-                    view.context.startActivity(intent)
-                }
+                val intent = Intent(Intent.ACTION_VIEW, request.url)
+                view.context.startActivity(intent)
                 return true
             }
         }
