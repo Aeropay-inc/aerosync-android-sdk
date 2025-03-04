@@ -14,8 +14,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
 import com.aerosync.bank_link_sdk.EventListener
+import com.aerosync.bank_link_sdk.PayloadEventType
+import com.aerosync.bank_link_sdk.PayloadSuccessType
 import com.aerosync.bank_link_sdk.Widget
-
 
 class HomeActivity : FragmentActivity(), EventListener {
 
@@ -51,10 +52,15 @@ class HomeActivity : FragmentActivity(), EventListener {
         }
     }
 
-    override fun onSuccess(response: String?, context: Context) {
+    override fun onSuccess(event: PayloadSuccessType?, context: Context?) {
         // perform steps when user have completed the bank link workflow
         // sample code
-        Toast.makeText(context, "onSuccess--> $response", Toast.LENGTH_SHORT).show()
+        if (event != null) {
+            Toast.makeText(context,  "user = ${event.user_id}, " +
+                    "ClientName = ${event.ClientName}, " +
+                    "FILoginAcctId = ${event.FILoginAcctId}", Toast.LENGTH_SHORT).show()
+
+        };
         val intent = Intent(context, HomeActivity::class.java)
         context.startActivity(intent);
         val output = findViewById<TextView>(R.id.output);
@@ -62,10 +68,14 @@ class HomeActivity : FragmentActivity(), EventListener {
 
     }
 
-    override fun onEvent(type: String?, payload: String?, context: Context) {
+    override fun onEvent(event: PayloadEventType?, context: Context?) {
         // capture all the Aerosync events
         // sample code
-        Toast.makeText(context, "onEvent--> $payload", Toast.LENGTH_SHORT).show()
+        if (event != null) {
+            Toast.makeText(context, "ONEVENT: onLoadApi = ${event.onLoadApi},\" +\n" +
+                    "                    \"pageTitle = ${event.pageTitle}", Toast.LENGTH_SHORT).show()
+
+        };
     }
 
     override fun onError(error: String?, context: Context) {
