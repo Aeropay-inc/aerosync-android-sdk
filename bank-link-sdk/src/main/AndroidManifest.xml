@@ -12,8 +12,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
-                    android:host="bank-link"
-                    android:scheme="aerosync" />
+                    android:host="@string/host_name"
+                    android:scheme="@string/app_scheme" />
             </intent-filter>
             .
     </activity>

@@ -18,7 +18,8 @@ android {
     defaultConfig {
         minSdk 24
         targetSdk 33
-
+        resValue "string", "host_name", "bank-link"
+        resValue "string", "app_scheme", "aerosync"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
     }

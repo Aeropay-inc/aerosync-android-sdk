@@ -62,9 +62,9 @@ class HomeActivity : FragmentActivity(), EventListener {
 
         };
         val intent = Intent(context, HomeActivity::class.java)
-        context.startActivity(intent);
+        context?.startActivity(intent);
         val output = findViewById<TextView>(R.id.output);
-        output.text = response;
+        output.text = event.toString();
 
     }
 
