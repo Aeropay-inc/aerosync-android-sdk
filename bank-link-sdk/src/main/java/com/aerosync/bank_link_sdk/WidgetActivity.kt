@@ -59,6 +59,6 @@ class WidgetActivity: FragmentActivity() {
                 return true
             }
         }
-        webView.loadUrl(url!!);
+        webView.loadUrl(url);
     }
 }

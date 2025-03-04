@@ -10,9 +10,11 @@ import android.widget.EditText
 import android.widget.Spinner
 import android.widget.SpinnerAdapter
 import android.view.View
+import android.widget.AdapterView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
+import com.aerosync.bank_link_sdk.EnvironmentType
 import com.aerosync.bank_link_sdk.EventListener
 import com.aerosync.bank_link_sdk.PayloadEventType
 import com.aerosync.bank_link_sdk.PayloadSuccessType
@@ -20,14 +22,22 @@ import com.aerosync.bank_link_sdk.Widget
 
 class HomeActivity : FragmentActivity(), EventListener {
 
+    var selectedEnvironment: EnvironmentType = EnvironmentType.STAGE
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
         val dropdown = findViewById<Spinner>(R.id.spinner)
         //create a list of items for the spinner.
-        val items = arrayOf("DEV", "STAGE", "SANDBOX", "PROD")
+        val items = EnvironmentType.values().map { it.name }
         val adapter: Any? = ArrayAdapter<Any?>(this, android.R.layout.simple_spinner_dropdown_item, items)
         dropdown.adapter = adapter as SpinnerAdapter?
+        dropdown?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedEnvironment = EnvironmentType.values()[position]
+            }
+        }
     }
 
     fun onClick(v: View?) {
@@ -38,15 +48,11 @@ class HomeActivity : FragmentActivity(), EventListener {
                 val configurationId = findViewById<EditText>(R.id.configurationId).text;
                 val aeroPassUserUuid = findViewById<EditText>(R.id.aeroPassUserUuid).text;
                 val envSpinner = findViewById<View>(R.id.spinner) as Spinner
-                val environment = envSpinner.selectedItem
                 val config = Widget(this, this);
-                config.environment = environment.toString(); //DEV, STAGE,PROD
+                config.environment = selectedEnvironment //STAGE, SANDBOX, PROD
                 config.token = token.toString();
                 config.configurationId = configurationId.toString();
                 config.aeroPassUserUuid = aeroPassUserUuid.toString();
-                Log.d("widget", token.toString())
-                Log.d("widget", configurationId.toString())
-                Log.d("widget", environment.toString())
                 config.open();
             }
         }
