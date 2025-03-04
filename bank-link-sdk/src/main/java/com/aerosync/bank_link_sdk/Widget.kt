@@ -10,7 +10,8 @@ data class Widget(
     var environment: EnvironmentType,
     var configurationId: String? = null,
     var token: String? = null,
-    var handleMFA: Boolean? = false,
+    var handleMFA: Boolean = false,
+    var manualLinkOnly: Boolean = false,
     var jobId: String? = null,
     var userId: String? = null,
     var aeroPassUserUuid: String? = null,
@@ -32,7 +33,8 @@ data class Widget(
                 "deeplink" to SYNC_DEEPLINK,
                 "configurationId" to configurationId,
                 "aeroPassUserUuid" to aeroPassUserUuid,
-                "handleMFA" to handleMFA.toString()
+                "handleMFA" to handleMFA.toString(),
+                "manualLinkOnly" to manualLinkOnly.toString()
 
             ));
             val intent = Intent(context, WidgetActivity::class.java);

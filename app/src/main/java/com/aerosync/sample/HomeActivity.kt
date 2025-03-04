@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Spinner
@@ -13,6 +12,7 @@ import android.view.View
 import android.widget.AdapterView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.FragmentActivity
 import com.aerosync.bank_link_sdk.EnvironmentType
 import com.aerosync.bank_link_sdk.EventListener
@@ -23,6 +23,7 @@ import com.aerosync.bank_link_sdk.Widget
 class HomeActivity : FragmentActivity(), EventListener {
 
     var selectedEnvironment: EnvironmentType = EnvironmentType.STAGE
+    var manualLinkOnly=  false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
@@ -38,6 +39,10 @@ class HomeActivity : FragmentActivity(), EventListener {
                 selectedEnvironment = EnvironmentType.values()[position]
             }
         }
+        val manualLinkOnlyId: SwitchCompat = findViewById(R.id.manual_link_only)
+        manualLinkOnlyId.setOnCheckedChangeListener { _, isChecked ->
+            this.manualLinkOnly = isChecked
+        }
     }
 
     fun onClick(v: View?) {
@@ -47,13 +52,13 @@ class HomeActivity : FragmentActivity(), EventListener {
                 val token = findViewById<EditText>(R.id.token).text;
                 val configurationId = findViewById<EditText>(R.id.configurationId).text;
                 val aeroPassUserUuid = findViewById<EditText>(R.id.aeroPassUserUuid).text;
-                val envSpinner = findViewById<View>(R.id.spinner) as Spinner
-                val config = Widget(this, this);
-                config.environment = selectedEnvironment //STAGE, SANDBOX, PROD
-                config.token = token.toString();
-                config.configurationId = configurationId.toString();
-                config.aeroPassUserUuid = aeroPassUserUuid.toString();
-                config.open();
+                val widget = Widget(this, this);
+                widget.environment = selectedEnvironment //STAGE, SANDBOX, PROD
+                widget.token = token.toString();
+                widget.manualLinkOnly = this.manualLinkOnly
+                widget.configurationId = configurationId.toString();
+                widget.aeroPassUserUuid = aeroPassUserUuid.toString();
+                widget.open();
             }
         }
     }

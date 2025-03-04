@@ -18,7 +18,8 @@ tools:context=".HomeActivity">
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:rippleColor="#6C5E5E" />
 
     <TextView
     android:id="@+id/textView"
@@ -32,39 +33,40 @@ tools:context=".HomeActivity">
     app:layout_constraintStart_toStartOf="parent"
     app:layout_constraintTop_toTopOf="parent" />
 
-<EditText
-    android:id="@+id/token"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="35dp"
-    android:ems="10"
-    android:inputType="text"
-    android:hint="@string/enter_token"
-    app:layout_constraintStart_toStartOf="@+id/spinner"
-    app:layout_constraintTop_toBottomOf="@+id/spinner" />
+    <EditText
+        android:id="@+id/token"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:ems="10"
+        android:hint="@string/enter_token"
+        android:inputType="text"
+        app:layout_constraintStart_toStartOf="@+id/spinner"
+        app:layout_constraintTop_toBottomOf="@+id/spinner" />
 
-<EditText
-    android:id="@+id/configurationId"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_marginTop="57dp"
-    android:ems="10"
-    android:inputType="text"
-    android:hint="@string/enter_configuration_id"
-    app:layout_constraintStart_toStartOf="@+id/token"
-    app:layout_constraintTop_toBottomOf="@+id/token" />
+    <EditText
+        android:id="@+id/configurationId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:ems="10"
+        android:hint="@string/enter_configuration_id"
+        android:inputType="text"
+        app:layout_constraintStart_toStartOf="@+id/token"
+        app:layout_constraintTop_toBottomOf="@+id/token" />
 
 
     <EditText
         android:id="@+id/aeroPassUserUuid"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="140dp"
+        android:layout_marginTop="16dp"
         android:ems="10"
         android:hint="@string/enter_aeropass_id"
         android:inputType="text"
-        app:layout_constraintStart_toStartOf="@+id/token"
-        app:layout_constraintTop_toBottomOf="@+id/token" />
+        app:layout_constraintStart_toStartOf="@+id/configurationId"
+        app:layout_constraintTop_toBottomOf="@+id/configurationId" />
+
 
     <Spinner
     android:id="@+id/spinner"
@@ -83,4 +85,27 @@ tools:context=".HomeActivity">
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/hide"
+        android:layout_width="210dp"
+        android:layout_height="29dp"
+        android:layout_marginTop="16dp"
+        android:ems="10"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="@+id/aeroPassUserUuid"
+        app:layout_constraintTop_toBottomOf="@+id/aeroPassUserUuid"
+        />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/manual_link_only"
+        android:layout_width="210dp"
+        android:layout_height="29dp"
+        android:layout_marginTop="16dp"
+        android:ems="10"
+        android:text="@string/manual_link_only"
+        app:layout_constraintStart_toStartOf="@+id/aeroPassUserUuid"
+        app:layout_constraintTop_toBottomOf="@+id/aeroPassUserUuid"
+        />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
