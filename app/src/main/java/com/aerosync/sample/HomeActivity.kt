@@ -51,13 +51,11 @@ class HomeActivity : FragmentActivity(), EventListener {
                 // open Aerosync widget
                 val token = findViewById<EditText>(R.id.token).text;
                 val configurationId = findViewById<EditText>(R.id.configurationId).text;
-                val aeroPassUserUuid = findViewById<EditText>(R.id.aeroPassUserUuid).text;
                 val widget = Widget(this, this);
                 widget.environment = selectedEnvironment //STAGE, SANDBOX, PROD
                 widget.token = token.toString();
                 widget.manualLinkOnly = this.manualLinkOnly
                 widget.configurationId = configurationId.toString();
-                widget.aeroPassUserUuid = aeroPassUserUuid.toString();
                 widget.open();
             }
         }

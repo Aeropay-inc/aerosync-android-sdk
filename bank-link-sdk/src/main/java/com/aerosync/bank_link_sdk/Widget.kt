@@ -14,7 +14,6 @@ data class Widget(
     var manualLinkOnly: Boolean = false,
     var jobId: String? = null,
     var userId: String? = null,
-    var aeroPassUserUuid: String? = null,
     var eventListener: EventListener,
     ) {
 
@@ -32,7 +31,6 @@ data class Widget(
                 "token" to token,
                 "deeplink" to SYNC_DEEPLINK,
                 "configurationId" to configurationId,
-                "aeroPassUserUuid" to aeroPassUserUuid,
                 "handleMFA" to handleMFA.toString(),
                 "manualLinkOnly" to manualLinkOnly.toString()
 

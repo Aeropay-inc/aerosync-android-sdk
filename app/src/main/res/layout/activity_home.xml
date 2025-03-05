@@ -56,18 +56,6 @@ tools:context=".HomeActivity">
         app:layout_constraintTop_toBottomOf="@+id/token" />
 
 
-    <EditText
-        android:id="@+id/aeroPassUserUuid"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:ems="10"
-        android:hint="@string/enter_aeropass_id"
-        android:inputType="text"
-        app:layout_constraintStart_toStartOf="@+id/configurationId"
-        app:layout_constraintTop_toBottomOf="@+id/configurationId" />
-
-
     <Spinner
     android:id="@+id/spinner"
     android:layout_width="220dp"
@@ -93,8 +81,8 @@ tools:context=".HomeActivity">
         android:layout_marginTop="16dp"
         android:ems="10"
         android:visibility="gone"
-        app:layout_constraintStart_toStartOf="@+id/aeroPassUserUuid"
-        app:layout_constraintTop_toBottomOf="@+id/aeroPassUserUuid"
+        app:layout_constraintStart_toStartOf="@+id/configurationId"
+        app:layout_constraintTop_toBottomOf="@+id/configurationId"
         />
 
     <androidx.appcompat.widget.SwitchCompat
@@ -104,8 +92,8 @@ tools:context=".HomeActivity">
         android:layout_marginTop="16dp"
         android:ems="10"
         android:text="@string/manual_link_only"
-        app:layout_constraintStart_toStartOf="@+id/aeroPassUserUuid"
-        app:layout_constraintTop_toBottomOf="@+id/aeroPassUserUuid"
+        app:layout_constraintStart_toStartOf="@+id/configurationId"
+        app:layout_constraintTop_toBottomOf="@+id/configurationId"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
