@@ -1,16 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".HomeActivity">
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+tools:context=".HomeActivity">
 
     <Button
         android:id="@+id/button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_marginBottom="44dp"
         android:onClick="onClick"
-        android:text="@string/home_button_name" />
-</RelativeLayout>
+        android:text="@string/launch_aerosync"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:rippleColor="#6C5E5E" />
+
+    <TextView
+    android:id="@+id/textView"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="69dp"
+    android:gravity="center"
+    android:text="@string/aerosync_android_sdk"
+    android:textSize="32sp"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/token"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:ems="10"
+        android:hint="@string/enter_token"
+        android:inputType="text"
+        app:layout_constraintStart_toStartOf="@+id/spinner"
+        app:layout_constraintTop_toBottomOf="@+id/spinner" />
+
+    <EditText
+        android:id="@+id/configurationId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:ems="10"
+        android:hint="@string/enter_configuration_id"
+        android:inputType="text"
+        app:layout_constraintStart_toStartOf="@+id/token"
+        app:layout_constraintTop_toBottomOf="@+id/token" />
+
+
+    <Spinner
+    android:id="@+id/spinner"
+    android:layout_width="220dp"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="313dp"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/output"
+        android:layout_width="297dp"
+        android:layout_height="123dp"
+        android:layout_marginTop="112dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/hide"
+        android:layout_width="210dp"
+        android:layout_height="29dp"
+        android:layout_marginTop="16dp"
+        android:ems="10"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="@+id/configurationId"
+        app:layout_constraintTop_toBottomOf="@+id/configurationId"
+        />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/manual_link_only"
+        android:layout_width="210dp"
+        android:layout_height="29dp"
+        android:layout_marginTop="16dp"
+        android:ems="10"
+        android:text="@string/manual_link_only"
+        app:layout_constraintStart_toStartOf="@+id/configurationId"
+        app:layout_constraintTop_toBottomOf="@+id/configurationId"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

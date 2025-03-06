@@ -3,62 +3,60 @@ package com.aerosync.bank_link_sdk
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import java.lang.StringBuilder
 
 data class Widget(
     var context: Context,
-    var environment: String? = null,
-    var deeplink: String? = null,
-    var consumerId: String? = null,
+    var environment: EnvironmentType,
+    var configurationId: String? = null,
     var token: String? = null,
-    var url: String? = null,
-    var handleMFA: Boolean? = false,
+    var handleMFA: Boolean = false,
+    var manualLinkOnly: Boolean = false,
     var jobId: String? = null,
     var userId: String? = null,
-    var eventListener: EventListener
-) {
+    var eventListener: EventListener,
+    ) {
 
     companion object {
         lateinit var eventObj: EventListener
     }
 
-    constructor(activity: Activity, eventListener: EventListener) : this(context = activity, eventListener = eventListener) {
-        // Aerosync pre-defined deeplink
-        // no need to change this value
-        this.deeplink = "aerosync://bank-link";
+    constructor(activity: Activity, eventListener: EventListener) : this(context = activity, eventListener = eventListener, environment = EnvironmentType.PROD) {
         eventObj = eventListener;
     }
 
     fun open() {
-        if(environment != null &&
-           deeplink != null &&
-           token !==null) {
-            url = constructUrl();
+        try {
+            val url = constructUrl(mapOf(
+                "token" to token,
+                "deeplink" to SYNC_DEEPLINK,
+                "configurationId" to configurationId,
+                "handleMFA" to handleMFA.toString(),
+                "manualLinkOnly" to manualLinkOnly.toString()
+
+            ));
             val intent = Intent(context, WidgetActivity::class.java);
-            intent.putExtra("url", this.url)
+            intent.putExtra("url", url)
             context.startActivity(intent);
+        } catch (e: Exception) {
+            eventObj.onError("Error | $ERROR_WIDGET_LOAD | ${e.message}", context)
         }
     }
 
-    protected fun constructUrl(): String {
-        val checkEnv = EnvironmentType.values().any { it.name == environment }
-        var baseUrl = "${EnvironmentType.valueOf("PROD").value}/?token=${token!!}"
+    private fun constructUrl(params: Map<String, String?>): String {
 
-        if(checkEnv) {
-            baseUrl = "${EnvironmentType.valueOf(environment!!).value}/?token=${token!!}";
-        }
+        var baseUrl = StringBuilder(environment.value)
 
-        if(checkEnv && !consumerId.isNullOrEmpty()) {
-            baseUrl = "${baseUrl}&consumerId=${consumerId}";
+        val configsItr = params.iterator()
+        if(configsItr.hasNext()) {
+            baseUrl.append("?")
+            configsItr.forEach { (key, value) ->
+                if(!value.isNullOrEmpty()) {
+                    baseUrl.append("${key}=${value}&")
+                }
+            }
         }
-
-        if(checkEnv && !deeplink.isNullOrEmpty()) {
-            baseUrl = "${baseUrl}&deeplink=${deeplink}";
-        }
-        
-        if(checkEnv && handleMFA == true) {
-            baseUrl = "${baseUrl}&handleMFA=${handleMFA}&jobId=${jobId}&userId=${userId}";
-        }
-
-        return baseUrl;
+        baseUrl.deleteCharAt(baseUrl.length - 1)
+        return baseUrl.toString();
     }
 }

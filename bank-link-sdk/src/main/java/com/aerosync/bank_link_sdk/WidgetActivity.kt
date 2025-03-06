@@ -11,9 +11,6 @@ import androidx.fragment.app.FragmentActivity
 import org.json.JSONObject
 
 
-
-
-
 class WidgetActivity: FragmentActivity() {
 
     private lateinit var webView: WebView
@@ -59,6 +56,9 @@ class WidgetActivity: FragmentActivity() {
                 return true
             }
         }
-        webView.loadUrl(url!!);
+        // Add custom headers
+        val headers = mutableMapOf<String, String>()
+        headers["deeplink"] = SYNC_DEEPLINK
+        webView.loadUrl(url, headers);
     }
 }

@@ -4,9 +4,17 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.ArrayAdapter
+import android.widget.EditText
+import android.widget.Spinner
+import android.widget.SpinnerAdapter
 import android.view.View
+import android.widget.AdapterView
+import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.FragmentActivity
+import com.aerosync.bank_link_sdk.EnvironmentType
 import com.aerosync.bank_link_sdk.EventListener
 import com.aerosync.bank_link_sdk.PayloadEventType
 import com.aerosync.bank_link_sdk.PayloadSuccessType
@@ -14,21 +22,41 @@ import com.aerosync.bank_link_sdk.Widget
 
 class HomeActivity : FragmentActivity(), EventListener {
 
-    private val config = Widget(this, this);
+    var selectedEnvironment: EnvironmentType = EnvironmentType.STAGE
+    var manualLinkOnly=  false
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_home)
+        val dropdown = findViewById<Spinner>(R.id.spinner)
+        //create a list of items for the spinner.
+        val items = EnvironmentType.values().map { it.name }
+        val adapter: Any? = ArrayAdapter<Any?>(this, android.R.layout.simple_spinner_dropdown_item, items)
+        dropdown.adapter = adapter as SpinnerAdapter?
+        dropdown?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                selectedEnvironment = EnvironmentType.values()[position]
+            }
         }
+        val manualLinkOnlyId: SwitchCompat = findViewById(R.id.manual_link_only)
+        manualLinkOnlyId.setOnCheckedChangeListener { _, isChecked ->
+            this.manualLinkOnly = isChecked
+        }
+    }
+
     fun onClick(v: View?) {
         when (v?.id) {
             R.id.button -> {
                 // open Aerosync widget
-                config.environment = "PROD"; // STAGE, PROD
-                config.token = ""; // Add Aerosync token
-                config.handleMFA = false;
-                config.userId = "";
-                config.jobId = "";
-                config.open();
+                val token = findViewById<EditText>(R.id.token).text;
+                val configurationId = findViewById<EditText>(R.id.configurationId).text;
+                val widget = Widget(this, this);
+                widget.environment = selectedEnvironment //STAGE, SANDBOX, PROD
+                widget.token = token.toString();
+                widget.manualLinkOnly = this.manualLinkOnly
+                widget.configurationId = configurationId.toString();
+                widget.open();
             }
         }
     }
@@ -44,6 +72,9 @@ class HomeActivity : FragmentActivity(), EventListener {
         };
         val intent = Intent(context, HomeActivity::class.java)
         context?.startActivity(intent);
+        val output = findViewById<TextView>(R.id.output);
+        output.text = event.toString();
+
     }
 
     override fun onEvent(event: PayloadEventType?, context: Context?) {
