@@ -45,7 +45,7 @@ tools:context=".HomeActivity">
         app:layout_constraintTop_toBottomOf="@+id/spinner" />
 
     <EditText
-        android:id="@+id/configurationId"
+        android:id="@+id/consumerId"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
@@ -81,8 +81,8 @@ tools:context=".HomeActivity">
         android:layout_marginTop="16dp"
         android:ems="10"
         android:visibility="gone"
-        app:layout_constraintStart_toStartOf="@+id/configurationId"
-        app:layout_constraintTop_toBottomOf="@+id/configurationId"
+        app:layout_constraintStart_toStartOf="@+id/consumerId"
+        app:layout_constraintTop_toBottomOf="@+id/consumerId"
         />
 
     <androidx.appcompat.widget.SwitchCompat
@@ -92,8 +92,8 @@ tools:context=".HomeActivity">
         android:layout_marginTop="16dp"
         android:ems="10"
         android:text="@string/manual_link_only"
-        app:layout_constraintStart_toStartOf="@+id/configurationId"
-        app:layout_constraintTop_toBottomOf="@+id/configurationId"
+        app:layout_constraintStart_toStartOf="@+id/consumerId"
+        app:layout_constraintTop_toBottomOf="@+id/consumerId"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

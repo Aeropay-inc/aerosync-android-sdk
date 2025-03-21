@@ -8,7 +8,7 @@ import java.lang.StringBuilder
 data class Widget(
     var context: Context,
     var environment: EnvironmentType,
-    var configurationId: String? = null,
+    var consumerId: String? = null,
     var token: String? = null,
     var handleMFA: Boolean = false,
     var manualLinkOnly: Boolean = false,
@@ -30,7 +30,7 @@ data class Widget(
             val url = constructUrl(mapOf(
                 "token" to token,
                 "deeplink" to SYNC_DEEPLINK,
-                "configurationId" to configurationId,
+                "consumerId" to consumerId,
                 "handleMFA" to handleMFA.toString(),
                 "manualLinkOnly" to manualLinkOnly.toString()
 
