@@ -8,12 +8,13 @@ import java.lang.StringBuilder
 data class Widget(
     var context: Context,
     var environment: EnvironmentType,
-    var consumerId: String? = null,
+    var configurationId: String? = null,
     var token: String? = null,
+    var aeroPassUserUuid: String? = null,
     var handleMFA: Boolean = false,
     var manualLinkOnly: Boolean = false,
     var jobId: String? = null,
-    var userId: String? = null,
+    var connectionId: String? = null,
     var eventListener: EventListener,
     ) {
 
@@ -29,10 +30,15 @@ data class Widget(
         try {
             val url = constructUrl(mapOf(
                 "token" to token,
+                "aeroPassUserUuid" to aeroPassUserUuid,
                 "deeplink" to SYNC_DEEPLINK,
-                "consumerId" to consumerId,
+                "configurationId" to configurationId,
                 "handleMFA" to handleMFA.toString(),
-                "manualLinkOnly" to manualLinkOnly.toString()
+                "manualLinkOnly" to manualLinkOnly.toString(),
+                "connectionId" to connectionId,
+                "jobId" to jobId,
+                "version" to SYNC_VERSION
+
 
             ));
             val intent = Intent(context, WidgetActivity::class.java);

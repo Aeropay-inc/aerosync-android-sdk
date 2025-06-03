@@ -1,14 +1,16 @@
 # aerosync-android-sdk
+
 Aerosync android library
 
 # Introduction
+
 This Android SDK provides an interface to load Aerosync-UI in native Android application. Securely link your bank account through your bank’s website. Log in with a fast, secure, and tokenized connection. Your information is never shared or sold.
 
 # 1. Install Bank-Link-Sdk
 
 Add latest verion of _com.aerosync/bank-link-sdk_ library to your project dependencies.
 
-Maven Central: 
+Maven Central:
 https://central.sonatype.com/artifact/com.aerosync/bank-link-sdk/overview
 https://repo1.maven.org/maven2/
 
@@ -27,6 +29,7 @@ implementation group: 'com.aerosync', name: 'bank-link-sdk', version: '1.0.1'
 # 2. Minimal example to implement bank-link-sdk
 
 **AndroidManifest.xml**
+
 ```
  <uses-permission android:name="android.permission.INTERNET"/>
 ```
@@ -68,12 +71,12 @@ class HomeActivity : FragmentActivity(), EventListener {
             R.id.button -> {
                 // open Aerosync widget
                 val token = findViewById<EditText>(R.id.token).text;
-                val consumerId = findViewById<EditText>(R.id.consumerId).text;
+                val configurationId = findViewById<EditText>(R.id.configurationId).text;
                 val widget = Widget(this, this);
                 widget.environment = selectedEnvironment //STAGE, SANDBOX, PROD
                 widget.token = token.toString();
                 widget.manualLinkOnly = this.manualLinkOnly
-                widget.consumerId = consumerId.toString();
+                widget.configurationId = configurationId.toString();
                 widget.open();
             }
         }
@@ -126,7 +129,3 @@ class HomeActivity : FragmentActivity(), EventListener {
 # 4. Bank Link SDK configuration and Aerosync-UI Response:
 
 https://api-aeropay.readme.io/docs/android-sdk#4-bank-link-sdk-configuration
-
-
-
-

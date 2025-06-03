@@ -29,10 +29,9 @@ class WebAppInterface(private val mContext: Context, private var eventListener: 
             when (widgetEventType) {
                 WidgetEventType.WIDGET_PAGE_SUCCESS -> {
                     val payloadSuccess = PayloadSuccessType(
-                        user_id = response.get("payload").asJsonObject.get("user_id").toString(),
-                        user_password = response.get("payload").asJsonObject.get("user_password").toString(),
-                        ClientName = response.get("payload").asJsonObject.get("ClientName").toString(),
-                        FILoginAcctId = response.get("payload").asJsonObject.get("FILoginAcctId").toString()
+                        connectionId = response.get("payload").asJsonObject.get("connectionId").toString(),
+                        aeroPassUserUuid = response.get("payload").asJsonObject.get("aeroPassUserUuid").toString(),
+                        clientName = response.get("payload").asJsonObject.get("clientName").toString(),
                     )
                     eventListener.onSuccess(payloadSuccess, mContext)
                 }
