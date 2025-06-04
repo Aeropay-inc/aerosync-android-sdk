@@ -16,6 +16,7 @@ data class Widget(
     var jobId: String? = null,
     var connectionId: String? = null,
     var eventListener: EventListener,
+    var defaultTheme: Theme = Theme.LIGHT
     ) {
 
     companion object {
@@ -37,10 +38,10 @@ data class Widget(
                 "manualLinkOnly" to manualLinkOnly.toString(),
                 "connectionId" to connectionId,
                 "jobId" to jobId,
-                "version" to SYNC_VERSION
-
-
+                "version" to SYNC_VERSION,
+                "defaultTheme" to defaultTheme.toString()
             ));
+
             val intent = Intent(context, WidgetActivity::class.java);
             intent.putExtra("url", url)
             context.startActivity(intent);

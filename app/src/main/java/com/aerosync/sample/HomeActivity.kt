@@ -19,17 +19,20 @@ import com.aerosync.bank_link_sdk.EnvironmentType
 import com.aerosync.bank_link_sdk.EventListener
 import com.aerosync.bank_link_sdk.PayloadEventType
 import com.aerosync.bank_link_sdk.PayloadSuccessType
+import com.aerosync.bank_link_sdk.Theme
 import com.aerosync.bank_link_sdk.Widget
 
 class HomeActivity : FragmentActivity(), EventListener {
 
     var selectedEnvironment: EnvironmentType = EnvironmentType.STAGE
+    var defaultTheme: Theme = Theme.LIGHT
     var manualLinkOnly=  false
     var handleMfa=  false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
         val dropdown = findViewById<Spinner>(R.id.spinner)
+        val themeDropdown = findViewById<Spinner>(R.id.theme)
         //create a list of items for the spinner.
         val items = EnvironmentType.values().map {  it.name.lowercase().replaceFirstChar { char -> char.uppercase() }  }
         val adapter: Any? = ArrayAdapter<Any?>(this, android.R.layout.simple_spinner_dropdown_item, items)
@@ -39,6 +42,17 @@ class HomeActivity : FragmentActivity(), EventListener {
 
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 selectedEnvironment = EnvironmentType.values()[position]
+            }
+        }
+        //create a list of items for the theme.
+        val themeItems = Theme.values().map {  it.name.lowercase().replaceFirstChar { char -> char.uppercase() }  }
+        val themeAdapter: Any? = ArrayAdapter<Any?>(this, android.R.layout.simple_spinner_dropdown_item, themeItems)
+        themeDropdown.adapter = themeAdapter as SpinnerAdapter?
+        themeDropdown?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                defaultTheme = Theme.values()[position]
             }
         }
         val manualLinkOnlyId: SwitchCompat = findViewById(R.id.manual_link_only)
@@ -90,6 +104,7 @@ class HomeActivity : FragmentActivity(), EventListener {
                 widget.configurationId = configurationId.toString();
                 widget.jobId = jobId.toString();
                 widget.connectionId = connectionId.toString();
+                widget.defaultTheme = defaultTheme
                 widget.open();
             }
         }
