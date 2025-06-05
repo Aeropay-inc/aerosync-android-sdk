@@ -13,10 +13,9 @@ enum class WidgetEventType(val event: String) {
 }
 
 data class PayloadSuccessType(
-    val user_id: String,
-    val user_password: String,
-    val ClientName: String,
-    val FILoginAcctId: String
+    val connectionId: String,
+    val clientName: String,
+    val aeroPassUserUuid: String
 )
 
 data class PayloadEventType(

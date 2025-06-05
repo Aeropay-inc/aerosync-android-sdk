@@ -13,23 +13,28 @@ import android.widget.AdapterView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.SwitchCompat
+import androidx.compose.ui.text.toLowerCase
 import androidx.fragment.app.FragmentActivity
 import com.aerosync.bank_link_sdk.EnvironmentType
 import com.aerosync.bank_link_sdk.EventListener
 import com.aerosync.bank_link_sdk.PayloadEventType
 import com.aerosync.bank_link_sdk.PayloadSuccessType
+import com.aerosync.bank_link_sdk.Theme
 import com.aerosync.bank_link_sdk.Widget
 
 class HomeActivity : FragmentActivity(), EventListener {
 
     var selectedEnvironment: EnvironmentType = EnvironmentType.STAGE
+    var defaultTheme: Theme = Theme.LIGHT
     var manualLinkOnly=  false
+    var handleMfa=  false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
         val dropdown = findViewById<Spinner>(R.id.spinner)
+        val themeDropdown = findViewById<Spinner>(R.id.theme)
         //create a list of items for the spinner.
-        val items = EnvironmentType.values().map { it.name }
+        val items = EnvironmentType.values().map {  it.name.lowercase().replaceFirstChar { char -> char.uppercase() }  }
         val adapter: Any? = ArrayAdapter<Any?>(this, android.R.layout.simple_spinner_dropdown_item, items)
         dropdown.adapter = adapter as SpinnerAdapter?
         dropdown?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
@@ -39,9 +44,34 @@ class HomeActivity : FragmentActivity(), EventListener {
                 selectedEnvironment = EnvironmentType.values()[position]
             }
         }
+        //create a list of items for the theme.
+        val themeItems = Theme.values().map {  it.name.lowercase().replaceFirstChar { char -> char.uppercase() }  }
+        val themeAdapter: Any? = ArrayAdapter<Any?>(this, android.R.layout.simple_spinner_dropdown_item, themeItems)
+        themeDropdown.adapter = themeAdapter as SpinnerAdapter?
+        themeDropdown?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                defaultTheme = Theme.values()[position]
+            }
+        }
         val manualLinkOnlyId: SwitchCompat = findViewById(R.id.manual_link_only)
         manualLinkOnlyId.setOnCheckedChangeListener { _, isChecked ->
             this.manualLinkOnly = isChecked
+        }
+        val handleMFAId: SwitchCompat = findViewById(R.id.handle_Mfa_only)
+        handleMFAId.setOnCheckedChangeListener { _, isChecked ->
+            this.handleMfa = isChecked
+            val jobIdField = findViewById<EditText>(R.id.jobId)
+            val connectionIdField = findViewById<EditText>(R.id.connectionId)
+
+            if (isChecked) {
+                jobIdField.visibility = View.VISIBLE
+                connectionIdField.visibility = View.VISIBLE
+            } else {
+                jobIdField.visibility = View.GONE
+                connectionIdField.visibility = View.GONE
+            }
         }
     }
 
@@ -50,12 +80,31 @@ class HomeActivity : FragmentActivity(), EventListener {
             R.id.button -> {
                 // open Aerosync widget
                 val token = findViewById<EditText>(R.id.token).text;
-                val consumerId = findViewById<EditText>(R.id.consumerId).text;
+                val aeroPassUserUuid = findViewById<EditText>(R.id.aeropassUserUuid).text;
+                val configurationId = findViewById<EditText>(R.id.configurationId).text;
+                val jobId = findViewById<EditText>(R.id.jobId).text;
+                val connectionId = findViewById<EditText>(R.id.connectionId).text;
                 val widget = Widget(this, this);
+
+                if(token.isNullOrEmpty()) {
+                    Toast.makeText(this, "Token is required!", Toast.LENGTH_SHORT).show()
+                    return
+                }
+
+                if(aeroPassUserUuid.isNullOrEmpty()) {
+                    Toast.makeText(this, "AeroPass ID is required!", Toast.LENGTH_SHORT).show()
+                    return
+                }
+
                 widget.environment = selectedEnvironment //STAGE, SANDBOX, PROD
                 widget.token = token.toString();
                 widget.manualLinkOnly = this.manualLinkOnly
-                widget.consumerId = consumerId.toString();
+                widget.handleMFA = this.handleMfa
+                widget.aeroPassUserUuid = aeroPassUserUuid.toString()
+                widget.configurationId = configurationId.toString();
+                widget.jobId = jobId.toString();
+                widget.connectionId = connectionId.toString();
+                widget.defaultTheme = defaultTheme
                 widget.open();
             }
         }
@@ -65,9 +114,9 @@ class HomeActivity : FragmentActivity(), EventListener {
         // perform steps when user have completed the bank link workflow
         // sample code
         if (event != null) {
-            Toast.makeText(context,  "user = ${event.user_id}, " +
-                    "ClientName = ${event.ClientName}, " +
-                    "FILoginAcctId = ${event.FILoginAcctId}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context,  "connectionId = ${event.connectionId}, " +
+                    "AeroPassId = ${event.aeroPassUserUuid}, " +
+                    "clientName = ${event.clientName}", Toast.LENGTH_SHORT).show()
 
         };
         val intent = Intent(context, HomeActivity::class.java)
