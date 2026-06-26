@@ -41,8 +41,15 @@ class WidgetActivity: FragmentActivity() {
         val intent = intent ?: return
         @Suppress("DEPRECATION")
         val url: String = intent.getSerializableExtra("url") as String;
+        val listener = Widget.eventObj
+        if (listener == null) {
+            // Recreated after a process kill with no listener registered.
+            // Close gracefully instead of crashing.
+            finish()
+            return
+        }
         webView = findViewById<WebView>(R.id.webView);
-        webAppInterface = WebAppInterface(this, Widget.eventObj);
+        webAppInterface = WebAppInterface(this, listener);
         @SuppressLint("SetJavaScriptEnabled")
         webView.settings.javaScriptEnabled = true;
         webView.addJavascriptInterface(webAppInterface, "BankLinkSDKAndroid");
