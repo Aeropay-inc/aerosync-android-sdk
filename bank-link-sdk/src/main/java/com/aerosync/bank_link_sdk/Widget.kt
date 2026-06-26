@@ -18,7 +18,7 @@ data class Widget(
     ) {
 
     companion object {
-        lateinit var eventObj: EventListener
+        var eventObj: EventListener? = null
     }
 
     constructor(activity: Activity, eventListener: EventListener) : this(context = activity, eventListener = eventListener, environment = EnvironmentType.PROD) {
@@ -39,7 +39,7 @@ data class Widget(
             intent.putExtra("url", url)
             context.startActivity(intent);
         } catch (e: Exception) {
-            eventObj.onError("Error | $ERROR_WIDGET_LOAD | ${e.message}", context)
+            eventObj?.onError("Error | $ERROR_WIDGET_LOAD | ${e.message}", context)
         }
     }
 
