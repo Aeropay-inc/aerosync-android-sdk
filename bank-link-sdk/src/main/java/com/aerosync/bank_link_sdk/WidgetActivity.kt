@@ -45,6 +45,8 @@ class WidgetActivity: FragmentActivity() {
         webAppInterface = WebAppInterface(this, Widget.eventObj);
         @SuppressLint("SetJavaScriptEnabled")
         webView.settings.javaScriptEnabled = true;
+        // Enable DOM storage (localStorage); required by the widget's auth flow.
+        webView.settings.domStorageEnabled = true;
         webView.addJavascriptInterface(webAppInterface, "BankLinkSDKAndroid");
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(
