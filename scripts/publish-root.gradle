@@ -26,15 +26,17 @@ if (secretPropsFile.exists()) {
 
 // Set up Sonatype repository
 nexusPublishing {
+    // Root project has no `group`, so set the package group explicitly,
+    // otherwise the staging-profile lookup gets an empty group and fails.
+    packageGroup = "com.aerosync"
     repositories {
         sonatype {
-            stagingProfileId = sonatypeStagingProfileId
             username = ossrhUsername
             password = ossrhPassword
-            version = rootVersionName
-            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
-            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
-
+            // Migrated from OSSRH (s01.oss.sonatype.org, EOL 2025-06-30) to the
+            // Central Portal OSSRH Staging API compatibility service.
+            nexusUrl.set(uri("https://ossrh-staging-api.central.sonatype.com/service/local/"))
+            snapshotRepositoryUrl.set(uri("https://central.sonatype.com/repository/maven-snapshots/"))
         }
     }
 }
