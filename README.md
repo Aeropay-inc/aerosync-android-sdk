@@ -6,6 +6,18 @@ Aerosync android library
 
 This Android SDK provides an interface to load Aerosync-UI in native Android application. Securely link your bank account through your bank’s website. Log in with a fast, secure, and tokenized connection. Your information is never shared or sold.
 
+Full reference: https://sync.dev.aero.inc/docs/android-aeronetwork
+
+# Requirements
+
+| | |
+| --- | --- |
+| `minSdk` | 24 |
+| `compileSdk` | 34 or higher (required from 2.1.0) |
+
+No code changes are needed in your app beyond the integration below. The SDK
+configures the WebView itself.
+
 # 1. Install Bank-Link-Sdk
 
 Add latest verion of _com.aerosync/bank-link-sdk_ library to your project dependencies.
@@ -18,15 +30,32 @@ https://repo1.maven.org/maven2/
 <dependency>
     <groupId>com.aerosync</groupId>
     <artifactId>bank-link-sdk</artifactId>
-    <version>1.0.1</version>
+    <version>2.1.0</version>
 </dependency>
 ```
 
 ```
-implementation group: 'com.aerosync', name: 'bank-link-sdk', version: '1.0.1'
+implementation group: 'com.aerosync', name: 'bank-link-sdk', version: '2.1.0'
 ```
 
-# 2. Minimal example to implement bank-link-sdk
+# 2. Widget configuration
+
+| Property | Type | Required | Notes |
+| --- | --- | --- | --- |
+| `token` | String | Yes | From the `GET /aggregatorCredentials` endpoint |
+| `environment` | EnvironmentType | Yes | `STAGE`, `SANDBOX` or `PROD`. Defaults to `PROD` |
+| `aeroPassUserUuid` | String | Yes | AeroNetwork user ID |
+| `configurationId` | String | No | Client customization identifier |
+| `handleMFA` | Boolean | No | For balance refresh workflows |
+| `jobId` | String | No | Required when `handleMFA` is true |
+| `connectionId` | String | No | Required when `handleMFA` is true |
+| `manualLinkOnly` | Boolean | No | Restrict to manual account linking |
+| `defaultTheme` | Theme | No | `Theme.LIGHT` or `Theme.DARK` |
+
+The deeplink back into the widget (`aerosync://bank-link`) is registered by the
+SDK, there is nothing to add to your manifest for it.
+
+# 3. Minimal example to implement bank-link-sdk
 
 **AndroidManifest.xml**
 
@@ -34,98 +63,105 @@ implementation group: 'com.aerosync', name: 'bank-link-sdk', version: '1.0.1'
  <uses-permission android:name="android.permission.INTERNET"/>
 ```
 
-**Homepage.kt**
+**HomeActivity.kt**
 
-```
+```kotlin
 //  https://github.com/Aeropay-inc/aerosync-android-sdk/blob/master/app/src/main/java/com/aerosync/sample/HomeActivity.kt
 
 package com.aerosync.sample
 
+import android.content.Context
+import android.content.Intent
+import android.os.Bundle
+import android.view.View
+import android.widget.Toast
+import androidx.fragment.app.FragmentActivity
+import com.aerosync.bank_link_sdk.EnvironmentType
+import com.aerosync.bank_link_sdk.EventListener
+import com.aerosync.bank_link_sdk.PayloadEventType
+import com.aerosync.bank_link_sdk.PayloadSuccessType
+import com.aerosync.bank_link_sdk.Theme
+import com.aerosync.bank_link_sdk.Widget
+
 class HomeActivity : FragmentActivity(), EventListener {
 
-    var selectedEnvironment: EnvironmentType = EnvironmentType.STAGE
-    var manualLinkOnly=  false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
-        val dropdown = findViewById<Spinner>(R.id.spinner)
-        //create a list of items for the spinner.
-        val items = EnvironmentType.values().map { it.name }
-        val adapter: Any? = ArrayAdapter<Any?>(this, android.R.layout.simple_spinner_dropdown_item, items)
-        dropdown.adapter = adapter as SpinnerAdapter?
-        dropdown?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                selectedEnvironment = EnvironmentType.values()[position]
-            }
-        }
-        val manualLinkOnlyId: SwitchCompat = findViewById(R.id.manual_link_only)
-        manualLinkOnlyId.setOnCheckedChangeListener { _, isChecked ->
-            this.manualLinkOnly = isChecked
-        }
     }
 
     fun onClick(v: View?) {
         when (v?.id) {
             R.id.button -> {
                 // open Aerosync widget
-                val token = findViewById<EditText>(R.id.token).text;
-                val configurationId = findViewById<EditText>(R.id.configurationId).text;
-                val widget = Widget(this, this);
-                widget.environment = selectedEnvironment //STAGE, SANDBOX, PROD
-                widget.token = token.toString();
-                widget.manualLinkOnly = this.manualLinkOnly
-                widget.configurationId = configurationId.toString();
-                widget.open();
+                val widget = Widget(this, this)
+                widget.environment = EnvironmentType.PROD
+                widget.token = "<TOKEN>"
+                widget.aeroPassUserUuid = "<AERONETWORK USER ID>"
+                widget.configurationId = "<CONFIGURATION ID>"
+                widget.defaultTheme = Theme.LIGHT
+                widget.open()
             }
         }
     }
 
     override fun onSuccess(event: PayloadSuccessType?, context: Context?) {
-        // perform steps when user have completed the bank link workflow
-        // sample code
+        // user completed the bank link workflow
         if (event != null) {
-            Toast.makeText(context,  "user = ${event.user_id}, " +
-                    "ClientName = ${event.ClientName}, " +
-                    "FILoginAcctId = ${event.FILoginAcctId}", Toast.LENGTH_SHORT).show()
-
-        };
-        val intent = Intent(context, HomeActivity::class.java)
-        context?.startActivity(intent);
-        val output = findViewById<TextView>(R.id.output);
-        output.text = event.toString();
-
+            Toast.makeText(
+                context,
+                "connectionId = ${event.connectionId}, " +
+                    "clientName = ${event.clientName}, " +
+                    "aeroPassUserUuid = ${event.aeroPassUserUuid}",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 
     override fun onEvent(event: PayloadEventType?, context: Context?) {
-        // capture all the Aerosync events
-        // sample code
+        // all Aerosync events
         if (event != null) {
-            Toast.makeText(context, "ONEVENT: onLoadApi = ${event.onLoadApi},\" +\n" +
-                    "                    \"pageTitle = ${event.pageTitle}", Toast.LENGTH_SHORT).show()
-
-        };
+            Toast.makeText(
+                context,
+                "pageTitle = ${event.pageTitle}, onLoadApi = ${event.onLoadApi}",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
     }
 
     override fun onError(error: String?, context: Context) {
-        // error handling
-        // sample code
         Toast.makeText(context, "onError--> $error", Toast.LENGTH_SHORT).show()
     }
 
     override fun onClose(context: Context) {
-        // when widget is closed by user
-        // sample code
-        Toast.makeText(context,"widget closed", Toast.LENGTH_SHORT).show()
-        val intent = Intent(context, HomeActivity::class.java)
-        context.startActivity(intent);
-        (context as Activity).finish()
+        // widget closed by the user
+        Toast.makeText(context, "widget closed", Toast.LENGTH_SHORT).show()
     }
 }
 
 ```
 
-# 4. Bank Link SDK configuration and Aerosync-UI Response:
+# 4. Events
+
+| Callback | Payload | Fires when |
+| --- | --- | --- |
+| `onSuccess` | `PayloadSuccessType(connectionId, clientName, aeroPassUserUuid)` | The bank link workflow completed |
+| `onEvent` | `PayloadEventType(pageTitle, onLoadApi)` | Any widget page event |
+| `onError` | `String` | The widget failed to load or errored |
+| `onClose` | none | The user closed the widget |
+
+# 5. Passkeys
+
+From 2.1.0 the widget can complete two factor authentication with a passkey
+inside the WebView instead of handing off to an external browser. This is
+automatic and requires no integration work. It applies when all of the following
+are true, and falls back to the external browser flow otherwise:
+
+-   the device has a recent Android System WebView (the SDK checks
+    `WebViewFeature.WEB_AUTHENTICATION` at runtime)
+-   the user has a screen lock or biometrics enrolled
+-   the user has a passkey, or chooses to create one
+
+# 6. Bank Link SDK configuration and Aerosync-UI Response:
 
 https://api-aeropay.readme.io/docs/android-sdk#4-bank-link-sdk-configuration
