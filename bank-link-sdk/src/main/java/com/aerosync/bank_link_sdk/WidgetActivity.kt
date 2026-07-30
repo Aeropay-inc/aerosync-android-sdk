@@ -8,6 +8,8 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.fragment.app.FragmentActivity
+import androidx.webkit.WebSettingsCompat
+import androidx.webkit.WebViewFeature
 import org.json.JSONObject
 
 
@@ -52,8 +54,16 @@ class WidgetActivity: FragmentActivity() {
         webAppInterface = WebAppInterface(this, listener);
         @SuppressLint("SetJavaScriptEnabled")
         webView.settings.javaScriptEnabled = true;
-        // Enable DOM storage (localStorage); required by the widget's auth flow.
+        // Required for authentication
         webView.settings.domStorageEnabled = true;
+        // WebAuthn is opt-in per app and absent from the WebView otherwise, so
+        // passkeys can't run at all without this.
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_AUTHENTICATION)) {
+            WebSettingsCompat.setWebAuthenticationSupport(
+                webView.settings,
+                WebSettingsCompat.WEB_AUTHENTICATION_SUPPORT_FOR_APP
+            )
+        }
         webView.addJavascriptInterface(webAppInterface, "BankLinkSDKAndroid");
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(
