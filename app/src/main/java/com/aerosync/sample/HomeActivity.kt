@@ -114,10 +114,17 @@ class HomeActivity : FragmentActivity(), EventListener {
         // perform steps when user have completed the bank link workflow
         // sample code
         if (event != null) {
-            Toast.makeText(context,  "connectionId = ${event.connectionId}, " +
-                    "AeroPassId = ${event.aeroPassUserUuid}, " +
-                    "clientName = ${event.clientName}", Toast.LENGTH_SHORT).show()
-
+            val accounts = event.accounts
+            if (accounts != null) {
+                // multi-account: one entry per linked account
+                val summary = accounts.joinToString(", ") { it.connectionId }
+                Toast.makeText(context, "connectionIds = $summary, " +
+                        "clientName = ${event.clientName}", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context,  "connectionId = ${event.connectionId}, " +
+                        "AeroPassId = ${event.aeroPassUserUuid}, " +
+                        "clientName = ${event.clientName}", Toast.LENGTH_SHORT).show()
+            }
         };
         val intent = Intent(context, HomeActivity::class.java)
         context?.startActivity(intent);

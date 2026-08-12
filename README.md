@@ -86,10 +86,18 @@ class HomeActivity : FragmentActivity(), EventListener {
         // perform steps when user have completed the bank link workflow
         // sample code
         if (event != null) {
-            Toast.makeText(context,  "user = ${event.user_id}, " +
-                    "ClientName = ${event.ClientName}, " +
-                    "FILoginAcctId = ${event.FILoginAcctId}", Toast.LENGTH_SHORT).show()
-
+            if (event.accounts != null) {
+                // multi-account: read accounts (connectionId, accountType,
+                // accountNumberDisplay). The top-level connectionId is null here.
+                event.accounts.forEach { account ->
+                    Log.d("AeroSync", "connectionId = ${account.connectionId}")
+                }
+            } else {
+                // single account: connectionId is always present
+                Toast.makeText(context, "connectionId = ${event.connectionId}, " +
+                        "clientName = ${event.clientName}, " +
+                        "aeroPassUserUuid = ${event.aeroPassUserUuid}", Toast.LENGTH_SHORT).show()
+            }
         };
         val intent = Intent(context, HomeActivity::class.java)
         context?.startActivity(intent);

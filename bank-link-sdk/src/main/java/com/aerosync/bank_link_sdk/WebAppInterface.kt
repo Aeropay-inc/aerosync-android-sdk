@@ -28,11 +28,31 @@ class WebAppInterface(private val mContext: Context, private var eventListener: 
         try {
             when (widgetEventType) {
                 WidgetEventType.WIDGET_PAGE_SUCCESS -> {
-                    val payloadSuccess = PayloadSuccessType(
-                        connectionId = response.get("payload").asJsonObject.get("connectionId").toString(),
-                        aeroPassUserUuid = response.get("payload").asJsonObject.get("aeroPassUserUuid").toString(),
-                        clientName = response.get("payload").asJsonObject.get("clientName").toString(),
-                    )
+                    val payload = response.get("payload").asJsonObject
+                    val payloadSuccess = if (payload.has("accounts")) {
+                        // multi-account: build one entry per linked account
+                        val accounts = payload.getAsJsonArray("accounts").map {
+                            val account = it.asJsonObject
+                            PayloadSuccessAccount(
+                                connectionId = account.get("connectionId").asString,
+                                accountType = account.get("accountType").asString,
+                                accountNumberDisplay = account.get("accountNumberDisplay").asString,
+                            )
+                        }
+                        PayloadSuccessType(
+                            connectionId = null,
+                            clientName = payload.get("clientName").asString,
+                            aeroPassUserUuid = payload.get("aeroPassUserUuid").asString,
+                            accounts = accounts,
+                        )
+                    } else {
+                        // single account
+                        PayloadSuccessType(
+                            connectionId = payload.get("connectionId").asString,
+                            clientName = payload.get("clientName").asString,
+                            aeroPassUserUuid = payload.get("aeroPassUserUuid").asString,
+                        )
+                    }
                     eventListener.onSuccess(payloadSuccess, mContext)
                 }
                 WidgetEventType.WIDGET_PAGE_LOADED

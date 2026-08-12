@@ -12,10 +12,18 @@ enum class WidgetEventType(val event: String) {
     }
 }
 
-data class PayloadSuccessType(
+// one linked account in the multi-account success payload
+data class PayloadSuccessAccount(
     val connectionId: String,
+    val accountType: String,
+    val accountNumberDisplay: String
+)
+
+data class PayloadSuccessType(
+    val connectionId: String?,                         // single flow (null in multi)
     val clientName: String,
-    val aeroPassUserUuid: String
+    val aeroPassUserUuid: String,
+    val accounts: List<PayloadSuccessAccount>? = null  // multi flow (null in single)
 )
 
 data class PayloadEventType(
