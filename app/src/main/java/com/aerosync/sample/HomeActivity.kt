@@ -24,7 +24,7 @@ import com.aerosync.bank_link_sdk.Widget
 
 class HomeActivity : FragmentActivity(), EventListener {
 
-    var selectedEnvironment: EnvironmentType = EnvironmentType.STAGE
+    var selectedEnvironment: EnvironmentType = EnvironmentType.SANDBOX
     var defaultTheme: Theme = Theme.LIGHT
     var manualLinkOnly=  false
     var handleMfa=  false
@@ -96,7 +96,7 @@ class HomeActivity : FragmentActivity(), EventListener {
                     return
                 }
 
-                widget.environment = selectedEnvironment //STAGE, SANDBOX, PROD
+                widget.environment = selectedEnvironment //SANDBOX, PROD
                 widget.token = token.toString();
                 widget.manualLinkOnly = this.manualLinkOnly
                 widget.handleMFA = this.handleMfa

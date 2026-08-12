@@ -43,7 +43,7 @@ package com.aerosync.sample
 
 class HomeActivity : FragmentActivity(), EventListener {
 
-    var selectedEnvironment: EnvironmentType = EnvironmentType.STAGE
+    var selectedEnvironment: EnvironmentType = EnvironmentType.SANDBOX
     var manualLinkOnly=  false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,7 +73,7 @@ class HomeActivity : FragmentActivity(), EventListener {
                 val token = findViewById<EditText>(R.id.token).text;
                 val configurationId = findViewById<EditText>(R.id.configurationId).text;
                 val widget = Widget(this, this);
-                widget.environment = selectedEnvironment //STAGE, SANDBOX, PROD
+                widget.environment = selectedEnvironment //SANDBOX, PROD
                 widget.token = token.toString();
                 widget.manualLinkOnly = this.manualLinkOnly
                 widget.configurationId = configurationId.toString();
