@@ -24,7 +24,7 @@ import com.aerosync.bank_link_sdk.Widget
 
 class HomeActivity : FragmentActivity(), EventListener {
 
-    var selectedEnvironment: EnvironmentType = EnvironmentType.STAGE
+    var selectedEnvironment: EnvironmentType = EnvironmentType.SANDBOX
     var defaultTheme: Theme = Theme.LIGHT
     var manualLinkOnly=  false
     var handleMfa=  false
@@ -96,7 +96,7 @@ class HomeActivity : FragmentActivity(), EventListener {
                     return
                 }
 
-                widget.environment = selectedEnvironment //STAGE, SANDBOX, PROD
+                widget.environment = selectedEnvironment //SANDBOX, PROD
                 widget.token = token.toString();
                 widget.manualLinkOnly = this.manualLinkOnly
                 widget.handleMFA = this.handleMfa
@@ -114,10 +114,17 @@ class HomeActivity : FragmentActivity(), EventListener {
         // perform steps when user have completed the bank link workflow
         // sample code
         if (event != null) {
-            Toast.makeText(context,  "connectionId = ${event.connectionId}, " +
-                    "AeroPassId = ${event.aeroPassUserUuid}, " +
-                    "clientName = ${event.clientName}", Toast.LENGTH_SHORT).show()
-
+            val accounts = event.accounts
+            if (accounts != null) {
+                // multi-account: one entry per linked account
+                val summary = accounts.joinToString(", ") { it.connectionId }
+                Toast.makeText(context, "connectionIds = $summary, " +
+                        "clientName = ${event.clientName}", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context,  "connectionId = ${event.connectionId}, " +
+                        "AeroPassId = ${event.aeroPassUserUuid}, " +
+                        "clientName = ${event.clientName}", Toast.LENGTH_SHORT).show()
+            }
         };
         val intent = Intent(context, HomeActivity::class.java)
         context?.startActivity(intent);
