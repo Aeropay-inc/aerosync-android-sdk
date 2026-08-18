@@ -137,3 +137,7 @@ class HomeActivity : FragmentActivity(), EventListener {
 # 4. Bank Link SDK configuration and Aerosync-UI Response:
 
 https://api-aeropay.readme.io/docs/android-sdk#4-bank-link-sdk-configuration
+
+# 5. Releasing a new version
+
+Maintainers: see [RELEASING.md](RELEASING.md) for the Maven Central publishing steps.
