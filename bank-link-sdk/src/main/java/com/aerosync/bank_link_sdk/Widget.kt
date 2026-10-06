@@ -3,67 +3,89 @@ package com.aerosync.bank_link_sdk
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import java.lang.StringBuilder
+import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultCaller
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 
-data class Widget(
-    var context: Context,
-    var environment: EnvironmentType,
-    var configurationId: String? = null,
-    var token: String? = null,
-    var aeroPassUserUuid: String? = null,
-    var handleMFA: Boolean = false,
-    var manualLinkOnly: Boolean = false,
-    var jobId: String? = null,
-    var connectionId: String? = null,
-    var eventListener: EventListener,
-    var defaultTheme: Theme = Theme.LIGHT
-    ) {
+/**
+ * Opens the Aerosync widget and reports its events to [EventListener].
+ *
+ * Create it as a field or in onCreate, not in a click handler.
+ *
+ * ```
+ * private val widget = Widget(this, listener)
+ * ...
+ * widget.open(WidgetConfiguration(token = token))
+ * ```
+ */
+class Widget private constructor(
+    caller: ActivityResultCaller,
+    owner: LifecycleOwner,
+    private val contextProvider: () -> Context,
+    private val listener: EventListener,
+) {
 
-    companion object {
-        var eventObj: EventListener? = null
-    }
+    constructor(activity: ComponentActivity, listener: EventListener) :
+        this(activity, activity, { activity }, listener)
 
-    constructor(activity: Activity, eventListener: EventListener) : this(context = activity, eventListener = eventListener, environment = EnvironmentType.PROD) {
-        eventObj = eventListener;
-    }
+    constructor(fragment: Fragment, listener: EventListener) :
+        this(fragment, fragment, { fragment.requireContext() }, listener)
 
-    fun open() {
-        try {
-            val url = constructUrl(mapOf(
-                "token" to token,
-                "aeroPassUserUuid" to aeroPassUserUuid,
-                "deeplink" to SYNC_DEEPLINK,
-                "configurationId" to configurationId,
-                "handleMFA" to handleMFA.toString(),
-                "manualLinkOnly" to manualLinkOnly.toString(),
-                "connectionId" to connectionId,
-                "jobId" to jobId,
-                "version" to SYNC_VERSION,
-                "defaultTheme" to defaultTheme.toString()
-            ));
+    private val launcher = caller.registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result -> onResult(result) }
 
-            val intent = Intent(context, WidgetActivity::class.java);
-            intent.putExtra("url", url)
-            context.startActivity(intent);
-        } catch (e: Exception) {
-            eventObj?.onError("Error | $ERROR_WIDGET_LOAD | ${e.message}", context)
-        }
-    }
-
-    private fun constructUrl(params: Map<String, String?>): String {
-
-        var baseUrl = StringBuilder(environment.value)
-
-        val configsItr = params.iterator()
-        if(configsItr.hasNext()) {
-            baseUrl.append("?")
-            configsItr.forEach { (key, value) ->
-                if(!value.isNullOrEmpty()) {
-                    baseUrl.append("${key}=${value}&")
-                }
+    init {
+        // Screen recreated while its widget is open: take over the live events
+        if (sessionOpen) liveListener = listener
+        // Never hold on to the listener of a destroyed screen
+        owner.lifecycle.addObserver(LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_DESTROY && liveListener === listener) {
+                liveListener = null
             }
+        })
+    }
+
+    fun open(configuration: WidgetConfiguration) {
+        try {
+            val context = contextProvider()
+            val url = buildWidgetUrl(configuration, syncDeeplink(context))
+            launcher.launch(
+                Intent(context, WidgetActivity::class.java)
+                    .putExtra(WidgetActivity.EXTRA_URL, url)
+            )
+            liveListener = listener
+            sessionOpen = true
+        } catch (e: Exception) {
+            listener.onError("Error | $ERROR_WIDGET_LOAD | ${e.message}")
         }
-        baseUrl.deleteCharAt(baseUrl.length - 1)
-        return baseUrl.toString();
+    }
+
+    private fun onResult(result: ActivityResult) {
+        sessionOpen = false
+        liveListener = null
+        @Suppress("DEPRECATION")
+        val success = result.data?.getParcelableExtra<PayloadSuccessType>(WidgetActivity.EXTRA_SUCCESS)
+        if (result.resultCode == Activity.RESULT_OK && success != null) {
+            listener.onSuccess(success)
+        } else {
+            // closed by the user, or the widget could not continue
+            listener.onClose()
+        }
+    }
+
+    internal companion object {
+        // Listener for the live events (onEvent / onError) of the open widget
+        @Volatile
+        var liveListener: EventListener? = null
+
+        // A widget is open and its result has not been delivered yet
+        @Volatile
+        var sessionOpen = false
     }
 }

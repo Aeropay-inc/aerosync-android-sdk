@@ -4,19 +4,23 @@
     <application>
         <activity
             android:name=".WidgetActivity"
-            android:launchMode="singleTask"
-            android:exported="true">
+            android:exported="false" />
 
+        <!-- Return deeplink, unique per host app -->
+        <activity
+            android:name=".RedirectActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
                     android:host="@string/host_name"
+                    android:path="/${applicationId}"
                     android:scheme="@string/app_scheme" />
             </intent-filter>
-            .
-    </activity>
+        </activity>
     </application>
 
 </manifest>

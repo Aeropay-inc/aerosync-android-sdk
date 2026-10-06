@@ -1,75 +1,75 @@
 package com.aerosync.bank_link_sdk
 
 import android.webkit.JavascriptInterface
-import android.content.Context
-import com.google.gson.Gson
-import com.google.gson.JsonObject
+import org.json.JSONObject
 import java.lang.Exception
 
-class WebAppInterface(private val mContext: Context, private var eventListener: EventListener) {
+// Parses the widget's events and reports them to WidgetActivity
+internal class WebAppInterface(private val eventListener: EventListener) {
     @JavascriptInterface
     fun streamEvents(event: String) {
         if(event.isEmpty()) return;
-        var response: JsonObject;
+        val response: JSONObject
         try {
-            response = Gson().fromJson(event, JsonObject::class.java)
+            response = JSONObject(event)
         } catch(e: Exception) {
-            eventListener.onError("Unable to parse sync event: $e", mContext)
+            eventListener.onError("Unable to parse sync event: $e")
             return;
         }
-        if(response.isEmpty) return
-        var widgetEventType: WidgetEventType? = null;
-        try{
-            widgetEventType = WidgetEventType.fromEvent(response.get("type").getAsString())!!
-        } catch (e: Exception) {
-            eventListener.onError("Invalid widget event type: $e", mContext)
+        if(response.length() == 0) return
+        val widgetEventType = WidgetEventType.fromEvent(response.optString("type"))
+        if(widgetEventType == null) {
+            eventListener.onError("Invalid widget event type: ${response.optString("type")}")
+            return
         }
-        if(widgetEventType == null) return
         try {
             when (widgetEventType) {
                 WidgetEventType.WIDGET_PAGE_SUCCESS -> {
-                    val payload = response.get("payload").asJsonObject
-                    val payloadSuccess = if (payload.has("accounts")) {
+                    val payload = response.getJSONObject("payload")
+                    val accountsJson = payload.optJSONArray("accounts")
+                    val payloadSuccess = if (accountsJson != null) {
                         // multi-account: build one entry per linked account
-                        val accounts = payload.getAsJsonArray("accounts").map {
-                            val account = it.asJsonObject
+                        val accounts = (0 until accountsJson.length()).map {
+                            val account = accountsJson.getJSONObject(it)
                             PayloadSuccessAccount(
-                                connectionId = account.get("connectionId").asString,
-                                accountType = account.get("accountType").asString,
-                                accountNumberDisplay = account.get("accountNumberDisplay").asString,
+                                connectionId = account.getString("connectionId"),
+                                accountType = account.getString("accountType"),
+                                accountNumberDisplay = account.getString("accountNumberDisplay"),
                             )
                         }
                         PayloadSuccessType(
                             connectionId = null,
-                            clientName = payload.get("clientName").asString,
-                            aeroPassUserUuid = payload.get("aeroPassUserUuid").asString,
+                            clientName = payload.getString("clientName"),
+                            aeroPassUserUuid = payload.getString("aeroPassUserUuid"),
                             accounts = accounts,
                         )
                     } else {
                         // single account
                         PayloadSuccessType(
-                            connectionId = payload.get("connectionId").asString,
-                            clientName = payload.get("clientName").asString,
-                            aeroPassUserUuid = payload.get("aeroPassUserUuid").asString,
+                            connectionId = payload.getString("connectionId"),
+                            clientName = payload.getString("clientName"),
+                            aeroPassUserUuid = payload.getString("aeroPassUserUuid"),
                         )
                     }
-                    eventListener.onSuccess(payloadSuccess, mContext)
+                    eventListener.onSuccess(payloadSuccess)
                 }
                 WidgetEventType.WIDGET_PAGE_LOADED
                 -> {
+                    val payload = response.getJSONObject("payload")
                     val payloadEvent = PayloadEventType(
-                        pageTitle = response.get("payload").asJsonObject.get("pageTitle").toString(),
-                        onLoadApi = response.get("payload").asJsonObject.get("onLoadApi").toString(),
+                        pageTitle = payload.optString("pageTitle"),
+                        onLoadApi = payload.optString("onLoadApi"),
                     )
-                    eventListener.onEvent(payloadEvent, mContext)
+                    eventListener.onEvent(payloadEvent)
                 }
-                WidgetEventType.WIDGET_CLOSE -> eventListener.onClose(mContext)
+                WidgetEventType.WIDGET_CLOSE -> eventListener.onClose()
                 WidgetEventType.WIDGET_ERROR -> {
-                    eventListener.onError(response.get("payload").toString(), mContext)
+                    // payload is usually a plain string; objects are passed on as JSON
+                    eventListener.onError(response.opt("payload")?.toString() ?: "")
                 }
             }
         } catch(e: Exception) {
-            eventListener.onError("Error in widget event callback: $e", mContext)
+            eventListener.onError("Error in widget event callback: $e")
         }
 
     }

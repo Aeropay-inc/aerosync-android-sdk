@@ -1,8 +1,5 @@
 package com.aerosync.sample
 
-import android.app.Activity
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.EditText
@@ -13,7 +10,6 @@ import android.widget.AdapterView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.SwitchCompat
-import androidx.compose.ui.text.toLowerCase
 import androidx.fragment.app.FragmentActivity
 import com.aerosync.bank_link_sdk.EnvironmentType
 import com.aerosync.bank_link_sdk.EventListener
@@ -21,8 +17,13 @@ import com.aerosync.bank_link_sdk.PayloadEventType
 import com.aerosync.bank_link_sdk.PayloadSuccessType
 import com.aerosync.bank_link_sdk.Theme
 import com.aerosync.bank_link_sdk.Widget
+import com.aerosync.bank_link_sdk.WidgetConfiguration
 
 class HomeActivity : FragmentActivity(), EventListener {
+
+    // Create the widget with the screen (not in the click handler), so the
+    // result still reaches this screen if the app is killed during bank login
+    private val widget = Widget(this, this)
 
     var selectedEnvironment: EnvironmentType = EnvironmentType.SANDBOX
     var defaultTheme: Theme = Theme.LIGHT
@@ -84,7 +85,6 @@ class HomeActivity : FragmentActivity(), EventListener {
                 val configurationId = findViewById<EditText>(R.id.configurationId).text;
                 val jobId = findViewById<EditText>(R.id.jobId).text;
                 val connectionId = findViewById<EditText>(R.id.connectionId).text;
-                val widget = Widget(this, this);
 
                 if(token.isNullOrEmpty()) {
                     Toast.makeText(this, "Token is required!", Toast.LENGTH_SHORT).show()
@@ -96,65 +96,58 @@ class HomeActivity : FragmentActivity(), EventListener {
                     return
                 }
 
-                widget.environment = selectedEnvironment //SANDBOX, PROD
-                widget.token = token.toString();
-                widget.manualLinkOnly = this.manualLinkOnly
-                widget.handleMFA = this.handleMfa
-                widget.aeroPassUserUuid = aeroPassUserUuid.toString()
-                widget.configurationId = configurationId.toString();
-                widget.jobId = jobId.toString();
-                widget.connectionId = connectionId.toString();
-                widget.defaultTheme = defaultTheme
-                widget.open();
+                widget.open(
+                    WidgetConfiguration(
+                        token = token.toString(),
+                        environment = selectedEnvironment, //SANDBOX, PROD
+                        aeroPassUserUuid = aeroPassUserUuid.toString(),
+                        configurationId = configurationId.toString(),
+                        handleMFA = this.handleMfa,
+                        manualLinkOnly = this.manualLinkOnly,
+                        jobId = jobId.toString(),
+                        connectionId = connectionId.toString(),
+                        defaultTheme = defaultTheme,
+                    )
+                )
             }
         }
     }
 
-    override fun onSuccess(event: PayloadSuccessType?, context: Context?) {
-        // perform steps when user have completed the bank link workflow
+    override fun onSuccess(event: PayloadSuccessType) {
+        // perform steps when user have completed the bank link workflow.
+        // The widget is already closed.
         // sample code
-        if (event != null) {
-            val accounts = event.accounts
-            if (accounts != null) {
-                // multi-account: one entry per linked account
-                val summary = accounts.joinToString(", ") { it.connectionId }
-                Toast.makeText(context, "connectionIds = $summary, " +
-                        "clientName = ${event.clientName}", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(context,  "connectionId = ${event.connectionId}, " +
-                        "AeroPassId = ${event.aeroPassUserUuid}, " +
-                        "clientName = ${event.clientName}", Toast.LENGTH_SHORT).show()
-            }
-        };
-        val intent = Intent(context, HomeActivity::class.java)
-        context?.startActivity(intent);
+        val accounts = event.accounts
+        if (accounts != null) {
+            // multi-account: one entry per linked account
+            val summary = accounts.joinToString(", ") { it.connectionId }
+            Toast.makeText(this, "connectionIds = $summary, " +
+                    "clientName = ${event.clientName}", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this,  "connectionId = ${event.connectionId}, " +
+                    "AeroPassId = ${event.aeroPassUserUuid}, " +
+                    "clientName = ${event.clientName}", Toast.LENGTH_SHORT).show()
+        }
         val output = findViewById<TextView>(R.id.output);
         output.text = event.toString();
-
     }
 
-    override fun onEvent(event: PayloadEventType?, context: Context?) {
+    override fun onEvent(event: PayloadEventType) {
         // capture all the Aerosync events
         // sample code
-        if (event != null) {
-            Toast.makeText(context, "ONEVENT: onLoadApi = ${event.onLoadApi},\" +\n" +
-                    "                    \"pageTitle = ${event.pageTitle}", Toast.LENGTH_SHORT).show()
-
-        };
+        Toast.makeText(this, "ONEVENT: onLoadApi = ${event.onLoadApi}, " +
+                "pageTitle = ${event.pageTitle}", Toast.LENGTH_SHORT).show()
     }
 
-    override fun onError(error: String?, context: Context) {
+    override fun onError(error: String) {
         // error handling
         // sample code
-        Toast.makeText(context, "onError--> $error", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "onError--> $error", Toast.LENGTH_SHORT).show()
     }
 
-    override fun onClose(context: Context) {
-        // when widget is closed by user
+    override fun onClose() {
+        // when widget is closed by user. The widget is already closed.
         // sample code
-        Toast.makeText(context,"widget closed", Toast.LENGTH_SHORT).show()
-        val intent = Intent(context, HomeActivity::class.java)
-        context.startActivity(intent);
-        (context as Activity).finish()
+        Toast.makeText(this,"widget closed", Toast.LENGTH_SHORT).show()
     }
 }

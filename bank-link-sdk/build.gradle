@@ -1,11 +1,12 @@
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
+    id 'kotlin-parcelize'
 }
 
 ext {
     PUBLISH_GROUP_ID = 'com.aerosync'
-    PUBLISH_VERSION = '2.1.1'
+    PUBLISH_VERSION = '3.0.0'
     PUBLISH_ARTIFACT_ID = 'bank-link-sdk'
 }
 
@@ -42,11 +43,12 @@ android {
 dependencies {
 
     implementation 'androidx.core:core-ktx:1.8.0'
-    implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.google.android.material:material:1.9.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    // api: Widget's public constructors take ComponentActivity / Fragment
+    api 'androidx.activity:activity:1.6.1'
+    api 'androidx.fragment:fragment:1.5.7'
     testImplementation 'junit:junit:4.13.2'
+    // real org.json for unit tests (android.jar only has stubs)
+    testImplementation 'org.json:json:20231013'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
-    implementation 'com.google.code.gson:gson:2.10.1'
 }

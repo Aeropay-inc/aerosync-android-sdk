@@ -18,15 +18,15 @@ https://repo1.maven.org/maven2/
 <dependency>
     <groupId>com.aerosync</groupId>
     <artifactId>bank-link-sdk</artifactId>
-    <version>1.0.1</version>
+    <version>3.0.0</version>
 </dependency>
 ```
 
 ```
-implementation group: 'com.aerosync', name: 'bank-link-sdk', version: '1.0.1'
+implementation 'com.aerosync:bank-link-sdk:3.0.0'
 ```
 
-# 2. Minimal example to implement bank-link-sdk
+# 2. Quick start
 
 **AndroidManifest.xml**
 
@@ -34,105 +34,110 @@ implementation group: 'com.aerosync', name: 'bank-link-sdk', version: '1.0.1'
  <uses-permission android:name="android.permission.INTERNET"/>
 ```
 
-**Homepage.kt**
+Nothing else is needed in your manifest. The SDK registers its return deeplink
+(`aerosync://bank-link/<your applicationId>`) automatically.
 
-```
-//  https://github.com/Aeropay-inc/aerosync-android-sdk/blob/master/app/src/main/java/com/aerosync/sample/HomeActivity.kt
+**1. Create the widget with your screen.** Your screen must be an `AppCompatActivity`,
+`FragmentActivity`, `ComponentActivity` or a `Fragment`. Create the `Widget` as a field
+(or in `onCreate`), not in a click handler. This is what lets `onSuccess` / `onClose`
+reach your screen even if Android killed your app while the user was in their bank app.
 
-package com.aerosync.sample
+**2. Open it** with a `WidgetConfiguration`.
 
-class HomeActivity : FragmentActivity(), EventListener {
+**3. Handle the events.** `onSuccess` and `onClose` are called after the widget has
+closed itself; you do not need to close it. All callbacks run on the main thread.
 
-    var selectedEnvironment: EnvironmentType = EnvironmentType.SANDBOX
-    var manualLinkOnly=  false
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_home)
-        val dropdown = findViewById<Spinner>(R.id.spinner)
-        //create a list of items for the spinner.
-        val items = EnvironmentType.values().map { it.name }
-        val adapter: Any? = ArrayAdapter<Any?>(this, android.R.layout.simple_spinner_dropdown_item, items)
-        dropdown.adapter = adapter as SpinnerAdapter?
-        dropdown?.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
+```kotlin
+// Full sample: app/src/main/java/com/aerosync/sample/HomeActivity.kt
 
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                selectedEnvironment = EnvironmentType.values()[position]
-            }
-        }
-        val manualLinkOnlyId: SwitchCompat = findViewById(R.id.manual_link_only)
-        manualLinkOnlyId.setOnCheckedChangeListener { _, isChecked ->
-            this.manualLinkOnly = isChecked
-        }
+class HomeActivity : AppCompatActivity(), EventListener {
+
+    private val widget = Widget(this, this)
+
+    fun onLinkBankClicked() {
+        widget.open(
+            WidgetConfiguration(
+                token = token,
+                environment = EnvironmentType.SANDBOX, // SANDBOX, PROD (default)
+                aeroPassUserUuid = aeroPassUserUuid,
+                // optional: configurationId, handleMFA, manualLinkOnly,
+                // jobId, connectionId, defaultTheme
+            )
+        )
     }
 
-    fun onClick(v: View?) {
-        when (v?.id) {
-            R.id.button -> {
-                // open Aerosync widget
-                val token = findViewById<EditText>(R.id.token).text;
-                val configurationId = findViewById<EditText>(R.id.configurationId).text;
-                val widget = Widget(this, this);
-                widget.environment = selectedEnvironment //SANDBOX, PROD
-                widget.token = token.toString();
-                widget.manualLinkOnly = this.manualLinkOnly
-                widget.configurationId = configurationId.toString();
-                widget.open();
-            }
+    override fun onSuccess(event: PayloadSuccessType) {
+        // user completed the bank link workflow
+        val accounts = event.accounts
+        if (accounts != null) {
+            // multi-account: read accounts (connectionId, accountType,
+            // accountNumberDisplay). The top-level connectionId is null here.
+        } else {
+            // single account: connectionId is always present
         }
     }
 
-    override fun onSuccess(event: PayloadSuccessType?, context: Context?) {
-        // perform steps when user have completed the bank link workflow
-        // sample code
-        if (event != null) {
-            if (event.accounts != null) {
-                // multi-account: read accounts (connectionId, accountType,
-                // accountNumberDisplay). The top-level connectionId is null here.
-                event.accounts.forEach { account ->
-                    Log.d("AeroSync", "connectionId = ${account.connectionId}")
-                }
-            } else {
-                // single account: connectionId is always present
-                Toast.makeText(context, "connectionId = ${event.connectionId}, " +
-                        "clientName = ${event.clientName}, " +
-                        "aeroPassUserUuid = ${event.aeroPassUserUuid}", Toast.LENGTH_SHORT).show()
-            }
-        };
-        val intent = Intent(context, HomeActivity::class.java)
-        context?.startActivity(intent);
-        val output = findViewById<TextView>(R.id.output);
-        output.text = event.toString();
-
+    override fun onClose() {
+        // user closed the widget
     }
 
-    override fun onEvent(event: PayloadEventType?, context: Context?) {
-        // capture all the Aerosync events
-        // sample code
-        if (event != null) {
-            Toast.makeText(context, "ONEVENT: onLoadApi = ${event.onLoadApi},\" +\n" +
-                    "                    \"pageTitle = ${event.pageTitle}", Toast.LENGTH_SHORT).show()
-
-        };
+    override fun onEvent(event: PayloadEventType) {
+        // page events while the widget is open (pageTitle, onLoadApi)
     }
 
-    override fun onError(error: String?, context: Context) {
-        // error handling
-        // sample code
-        Toast.makeText(context, "onError--> $error", Toast.LENGTH_SHORT).show()
-    }
-
-    override fun onClose(context: Context) {
-        // when widget is closed by user
-        // sample code
-        Toast.makeText(context,"widget closed", Toast.LENGTH_SHORT).show()
-        val intent = Intent(context, HomeActivity::class.java)
-        context.startActivity(intent);
-        (context as Activity).finish()
+    override fun onError(error: String) {
+        // errors while the widget is open; the user may be able to continue
     }
 }
-
 ```
+
+**From a Fragment**, pass the Fragment instead: `private val widget = Widget(this, listener)`.
+
+**Other ways to pass the listener.** Your screen does not have to implement `EventListener`:
+
+```kotlin
+// Inline
+private val widget = Widget(this, object : EventListener { /* ... */ })
+
+// Separate property: declare the listener BEFORE the widget. Kotlin initializes
+// properties top to bottom, so the other order passes null and crashes.
+private val listener = object : EventListener { /* ... */ }
+private val widget = Widget(this, listener)
+```
+
+Inside `object : EventListener { }`, `this` is the listener; use `this@YourActivity` for the screen.
+
+# 3. Migrating from 2.x
+
+3.0.0 moves the widget to the Activity Result API, so the result survives Android
+killing your app during the bank login. Changes:
+
+1. Your screen must be an `AppCompatActivity` / `FragmentActivity` / `ComponentActivity` or a `Fragment`.
+2. Create `Widget(this, this)` as a field or in `onCreate`, not in your click handler.
+3. Pass the options to `open()` instead of setting properties on the widget:
+   ```kotlin
+   // 2.x
+   widget.environment = EnvironmentType.PROD
+   widget.token = token
+   widget.open()
+   // 3.0.0
+   widget.open(WidgetConfiguration(token = token, environment = EnvironmentType.PROD))
+   ```
+4. Remove the `context` parameter from your callbacks; the payloads are no longer nullable:
+
+   | 2.x | 3.0.0 |
+   |---|---|
+   | `onSuccess(event: PayloadSuccessType?, context: Context?)` | `onSuccess(event: PayloadSuccessType)` |
+   | `onEvent(event: PayloadEventType?, context: Context?)` | `onEvent(event: PayloadEventType)` |
+   | `onError(error: String?, context: Context)` | `onError(error: String)` |
+   | `onClose(context: Context)` | `onClose()` |
+5. The SDK now closes the widget itself. Remove `(context as Activity).finish()` from
+   `onClose` and any code that re-launches your own screen from `onSuccess`.
+   In 3.0.0 there is no widget context to finish, and finishing your own screen would close it.
+6. `onEvent` values and `onError` messages no longer include JSON quote marks
+   (`/verify` instead of `"/verify"`). Remove any code that strips them.
+7. The return deeplink is now unique per app (`aerosync://bank-link/<applicationId>`).
+   Nothing to change on your side.
 
 # 4. Bank Link SDK configuration and Aerosync-UI Response:
 

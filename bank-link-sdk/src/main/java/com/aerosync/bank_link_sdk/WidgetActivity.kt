@@ -1,64 +1,81 @@
 package com.aerosync.bank_link_sdk
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.view.KeyEvent
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.FragmentActivity
-import org.json.JSONObject
 
 
 class WidgetActivity: FragmentActivity() {
 
-    private lateinit var webView: WebView
-    private lateinit var webAppInterface: WebAppInterface
+    internal companion object {
+        const val EXTRA_URL = "url"
+        const val EXTRA_SUCCESS = "success"
+    }
 
+    private lateinit var webView: WebView
+    // Set once the widget has succeeded or closed; later events are ignored
+    private var completed = false
+
+    // Widget events arrive on the WebView's JavaBridge thread; handle them on the main thread
+    private val eventHandler = object : EventListener {
+        override fun onSuccess(event: PayloadSuccessType) = runOnUiThread {
+            finishWithResult(Activity.RESULT_OK, Intent().putExtra(EXTRA_SUCCESS, event))
+        }
+
+        override fun onClose() = runOnUiThread { finishWithResult(Activity.RESULT_CANCELED) }
+
+        override fun onEvent(event: PayloadEventType) = runOnUiThread {
+            if (!completed) Widget.liveListener?.onEvent(event)
+        }
+
+        override fun onError(error: String) = runOnUiThread {
+            if (!completed) Widget.liveListener?.onError(error)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_widget);
-        initializeWebView()
-    }
-
-    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        // Widget was never set up (activity closed early in initializeWebView)
-        if (!::webAppInterface.isInitialized) {
-            return super.onKeyDown(keyCode, event)
-        }
-        // handle widget navigation to go back
-        if (keyCode == KeyEvent.KEYCODE_BACK && webView.canGoBack()) {
-            webView.goBack()
-            return true
-        }
-        // default system behaviour when user exit the widget
-        val jsonObject = JSONObject()
-        jsonObject.put("type", "widgetClose");
-        jsonObject.put("payload", JSONObject());
-        webAppInterface.streamEvents(jsonObject.toString())
-        return super.onKeyDown(keyCode, event)
-    }
-
-    protected fun initializeWebView() {
-        val intent = intent ?: return
-        val listener = Widget.eventObj
-        val url = intent.getStringExtra("url")
-        if (listener == null || url == null) {
-            // Recreated after a process kill, or opened by the aerosync://bank-link
-            // deeplink / a third-party VIEW intent without the url extra.
-            // Close gracefully instead of crashing.
+        val url = intent?.getStringExtra(EXTRA_URL)
+        if (url == null) {
+            // Opened without the url extra (no widget to return to); close instead of crashing
             finish()
             return
         }
+        initializeWebView(url)
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                // handle widget navigation to go back, otherwise close the widget
+                if (webView.canGoBack()) {
+                    webView.goBack()
+                } else {
+                    finishWithResult(Activity.RESULT_CANCELED)
+                }
+            }
+        })
+    }
+
+    // The SDK owns closing the widget: return the outcome to Widget and finish
+    private fun finishWithResult(resultCode: Int, data: Intent? = null) {
+        if (completed) return
+        completed = true
+        setResult(resultCode, data)
+        finish()
+    }
+
+    private fun initializeWebView(url: String) {
         webView = findViewById<WebView>(R.id.webView);
-        webAppInterface = WebAppInterface(this, listener);
         @SuppressLint("SetJavaScriptEnabled")
         webView.settings.javaScriptEnabled = true;
         // Enable DOM storage (localStorage); required by the widget's auth flow.
         webView.settings.domStorageEnabled = true;
-        webView.addJavascriptInterface(webAppInterface, "BankLinkSDKAndroid");
+        webView.addJavascriptInterface(WebAppInterface(eventHandler), "BankLinkSDKAndroid");
         webView.webViewClient = object : WebViewClient() {
             override fun shouldOverrideUrlLoading(
                 view: WebView,
@@ -71,7 +88,7 @@ class WidgetActivity: FragmentActivity() {
         }
         // Add custom headers
         val headers = mutableMapOf<String, String>()
-        headers["deeplink"] = SYNC_DEEPLINK
+        headers["deeplink"] = syncDeeplink(this)
         webView.loadUrl(url, headers);
     }
 }
