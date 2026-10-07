@@ -24,6 +24,10 @@ class WidgetActivity: FragmentActivity() {
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        // Widget was never set up (activity closed early in initializeWebView)
+        if (!::webAppInterface.isInitialized) {
+            return super.onKeyDown(keyCode, event)
+        }
         // handle widget navigation to go back
         if (keyCode == KeyEvent.KEYCODE_BACK && webView.canGoBack()) {
             webView.goBack()
@@ -39,11 +43,11 @@ class WidgetActivity: FragmentActivity() {
 
     protected fun initializeWebView() {
         val intent = intent ?: return
-        @Suppress("DEPRECATION")
-        val url: String = intent.getSerializableExtra("url") as String;
         val listener = Widget.eventObj
-        if (listener == null) {
-            // Recreated after a process kill with no listener registered.
+        val url = intent.getStringExtra("url")
+        if (listener == null || url == null) {
+            // Recreated after a process kill, or opened by the aerosync://bank-link
+            // deeplink / a third-party VIEW intent without the url extra.
             // Close gracefully instead of crashing.
             finish()
             return
